@@ -5,14 +5,14 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Groups")
+@Table(name = "groups_table")
 public class Groups {
 
     //Fields init---------------------------------------------------------------------
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "group_id")
-    private int groupId;
+    private long groupId;
 
     @Column(name = "group_name")
     private String name;
@@ -33,15 +33,68 @@ public class Groups {
 
     }
 
-    public Groups(int groupId, String name, User createdBy, LocalDateTime createdAt, LocalDateTime updatedDate) {
+    public Groups(long groupId, String name, User createdBy) {
         this.groupId = groupId;
         this.name = name;
         this.createdBy = createdBy;
-        this.createdAt = createdAt;
-        this.updatedDate = updatedDate;
+        this.createdAt = LocalDateTime.now();
+        this.updatedDate = LocalDateTime.now();
+    }
+
+    //ToString method---------------------------------------------------------------------------------------
+
+    @Override
+    public String toString() {
+        return "Groups{" +
+                "groupId=" + groupId +
+                ", name='" + name + '\'' +
+                ", createdBy=" + createdBy.getUserId() +
+                ", createdAt=" + createdAt +
+                ", updatedDate=" + updatedDate +
+                '}';
     }
 
 
+    //Getters and Setters--------------------------------------------------------------------------------------------
 
 
+    public long getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(long groupId) {
+        this.groupId = groupId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public long getCreatedBy() {
+        return createdBy.getUserId();
+    }
+
+    public void setCreatedBy(User createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(LocalDateTime updatedDate) {
+        this.updatedDate = updatedDate;
+    }
 }

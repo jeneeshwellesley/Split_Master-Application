@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Contacts")
+@Table(name = "contacts_table")
 public class Contacts {
 
     //Fields Init-----------------------------------------------------------------------------------------

@@ -9,10 +9,11 @@ import java.time.LocalDateTime;
 @Table(name = "Contacts")
 public class Contacts {
 
-    //Fields Init
+    //Fields Init-----------------------------------------------------------------------------------------
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private long id;
 
     @ManyToOne
@@ -42,7 +43,7 @@ public class Contacts {
         this.updatedAt = LocalDateTime.now();
     }
 
-    //ToString init
+    //ToString init------------------------------------------------------------------
 
 
     @Override
@@ -75,8 +76,8 @@ public class Contacts {
         this.user = user;
     }
 
-    public User getContact() {
-        return contact;
+    public long getContactId() {
+        return contact.getUserId();
     }
 
     public void setContact(User contact) {

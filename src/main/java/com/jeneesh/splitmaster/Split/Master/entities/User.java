@@ -23,7 +23,7 @@ public class User {
     private String password;
 
     @Column(name = "phone_Number")
-    private int phoneNumber;
+    private String phoneNumber;
 
     @Column(name = "created_At")
     private LocalDateTime createdAt;
@@ -36,7 +36,7 @@ public class User {
     public User() {}
 
     public User(long userId, String userName, String password,
-                int phoneNumber) {
+                String phoneNumber) {
         this.userId = userId;
         this.userName = userName;
         this.password = password;
@@ -87,11 +87,11 @@ public class User {
         this.password = password;
     }
 
-    public int getPhoneNumber() {
+    public String getPhoneNumber() {
         return phoneNumber;
     }
 
-    public void setPhoneNumber(int phoneNumber) {
+    public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
     }
 

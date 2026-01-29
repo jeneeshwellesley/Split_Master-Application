@@ -16,28 +16,27 @@ public class User {
     @Column(name = "user_Id")
     private long userId;
 
-    @Column(name ="user_Name")
+    @Column(name ="user_Name",nullable = true)
     private String userName;
 
-    @Column(name = "password")
+    @Column(name = "password",nullable = false)
     private String password;
 
-    @Column(name = "phone_Number")
+    @Column(name = "phone_Number",nullable = false,unique = true)
     private String phoneNumber;
 
-    @Column(name = "created_At")
+    @Column(name = "created_At",nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_At")
+    @Column(name = "updated_At",nullable = true)
     private LocalDateTime updatedAt;
 
     //Constructors-----------------------------------------------------------------
 
     public User() {}
 
-    public User(long userId, String userName, String password,
+    public User(String userName, String password,
                 String phoneNumber) {
-        this.userId = userId;
         this.userName = userName;
         this.password = password;
         this.phoneNumber = phoneNumber;

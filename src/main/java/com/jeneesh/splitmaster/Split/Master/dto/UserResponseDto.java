@@ -11,6 +11,10 @@ public class UserResponseDto {
         this.phoneNumber = phoneNumber;
     }
 
+    public UserResponseDto() {
+
+    }
+
     @Override
     public String toString() {
         return "UserResponseDto{" +

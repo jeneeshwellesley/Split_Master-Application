@@ -5,10 +5,14 @@ public class UserRequestDto {
     private String phoneNumber;
     private String password;
 
-    UserRequestDto(String phoneNumber, String password,  String name) {
+    UserRequestDto(String name, String phoneNumber,  String password) {
         this.phoneNumber = phoneNumber;
         this.password = password;
         this.name = name;
+    }
+
+    public UserRequestDto() {
+
     }
 
     @Override

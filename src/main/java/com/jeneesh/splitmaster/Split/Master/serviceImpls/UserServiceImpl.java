@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserResponseDto register(UserRequestDto user) {
         if(user == null || user.getPhoneNumber() == null ||user.getPhoneNumber().isBlank() ||
-                user.getPassword() == null || user.getPassword().isBlank() || user.getPhoneNumber().matches("^[6-9]\\d{9}$")){
+                user.getPassword() == null ||user.getName() == null ||!user.getName().matches("^[A-Za-z ]+$")|| user.getName().isBlank()|| user.getPassword().isBlank() ||!user.getPhoneNumber().matches("^[6-9]\\d{9}$")){
             throw new RuntimeException("Invalid user details");
         }
 

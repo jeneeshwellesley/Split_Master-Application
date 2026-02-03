@@ -14,7 +14,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_Id")
-    private long userId;
+    private Long userId;
 
     @Column(name ="user_Name",nullable = true)
     private String userName;
@@ -62,11 +62,11 @@ public class User {
     //Getters and Setters---------------------------------------------------------------------------
 
 
-    public long getUserId() {
+    public Long getUserId() {
         return userId;
     }
 
-    public void setUserId(long userId) {
+    public void setUserId(Long userId) {
         this.userId = userId;
     }
 

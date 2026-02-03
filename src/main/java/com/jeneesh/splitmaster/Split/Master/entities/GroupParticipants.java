@@ -13,7 +13,7 @@ public class GroupParticipants {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "group_id",nullable = false)
@@ -35,8 +35,7 @@ public class GroupParticipants {
 
     }
 
-    public GroupParticipants(long id, Groups groupId,User membersId, String role){
-        this.id = id;
+    public GroupParticipants(Groups groupId,User membersId, String role){
         this.groupId = groupId;
         this.membersId = membersId;
         this.role = role;
@@ -68,11 +67,11 @@ public class GroupParticipants {
         this.groupId = groupId;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

@@ -14,7 +14,7 @@ public class Expense {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "expense_id")
-    private long expenseId;
+    private Long expenseId;
 
     @ManyToOne
     @JoinColumn(name = "group_id",nullable = false)
@@ -39,10 +39,8 @@ public class Expense {
 
     }
 
-    public Expense(long expenseId,Groups groupId, User createdBy,
+    public Expense(Groups groupId, User createdBy,
                    String description, double totalAmount){
-
-        this.expenseId = expenseId;
         this.groupId = groupId;
         this.createdBy = createdBy;
         this.description = description;
@@ -69,11 +67,11 @@ public class Expense {
     //Getters and Setters---------------------------------------------------------
 
 
-    public long getExpenseId() {
+    public Long getExpenseId() {
         return expenseId;
     }
 
-    public void setExpenseId(long expenseId) {
+    public void setExpenseId(Long expenseId) {
         this.expenseId = expenseId;
     }
 

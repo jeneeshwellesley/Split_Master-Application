@@ -12,7 +12,7 @@ public class Groups {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "group_id")
-    private long groupId;
+    private Long groupId;
 
     @Column(name = "group_name")
     private String name;
@@ -33,8 +33,7 @@ public class Groups {
 
     }
 
-    public Groups(long groupId, String name, User createdBy) {
-        this.groupId = groupId;
+    public Groups(String name, User createdBy) {
         this.name = name;
         this.createdBy = createdBy;
         this.createdAt = LocalDateTime.now();
@@ -58,11 +57,11 @@ public class Groups {
     //Getters and Setters--------------------------------------------------------------------------------------------
 
 
-    public long getGroupId() {
+    public Long getGroupId() {
         return groupId;
     }
 
-    public void setGroupId(long groupId) {
+    public void setGroupId(Long groupId) {
         this.groupId = groupId;
     }
 

@@ -14,7 +14,7 @@ public class ExpenseParticipants {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private long id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "expense_id",nullable = false)
@@ -49,9 +49,8 @@ public class ExpenseParticipants {
 
     }
 
-    public ExpenseParticipants(long id, Expense expenseId, User userId, double ownedAmount,
+    public ExpenseParticipants(Expense expenseId, User userId, double ownedAmount,
                                double paidAmount,double remainingAmount,int installmentCount){
-        this.id = id;
         this.expenseId = expenseId;
         this.userId = userId;
         this.ownedAmount = ownedAmount;
@@ -83,11 +82,11 @@ public class ExpenseParticipants {
     //Getters and Setters-----------------------------------------------------------------------
 
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

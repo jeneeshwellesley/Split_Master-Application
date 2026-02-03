@@ -1,0 +1,33 @@
+package com.jeneesh.splitmaster.Split.Master.validations;
+
+public class UserValidation {
+
+    public static boolean validPhoneNumber(String ph) {
+        if (ph == null || ph.isBlank() || ph.isEmpty() || !ph.matches("^[6-9]\\d{9}$")) {
+            throw new RuntimeException("Invalid Phone Number");
+        } else {
+            return true;
+        }
+    }
+
+        public static boolean validUserName(String name) {
+            if (name == null || name.isBlank() || name.isEmpty() || !name.matches("^[A-Za-z ]+$")) {
+                throw new RuntimeException("Invalid Username");
+            } else {
+                return true;
+            }
+        }
+
+    public static boolean validPassword(String word){
+        if (word == null || word.isBlank() || word.isEmpty()) {
+            throw new RuntimeException("Invalid Password");
+        } else {
+            return true;
+        }
+    }
+
+
+
+
+    }
+

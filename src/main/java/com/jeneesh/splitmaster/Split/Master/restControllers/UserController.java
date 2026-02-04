@@ -2,6 +2,7 @@ package com.jeneesh.splitmaster.Split.Master.restControllers;
 
 import com.jeneesh.splitmaster.Split.Master.dto.*;
 import com.jeneesh.splitmaster.Split.Master.entities.User;
+import com.jeneesh.splitmaster.Split.Master.services.ContactService;
 import com.jeneesh.splitmaster.Split.Master.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -10,11 +11,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
     private UserService userService;
+    private ContactService contactService;
 
     @Autowired
-    UserController(UserService userService) {
+    UserController(UserService userService,ContactService contactService) {
         this.userService = userService;
+        this.contactService = contactService;
     }
+    //User operations endpoints------------------------------------------------------------------------------
 
     @PostMapping("/save")
     public UserResponseDto saveUser(@RequestBody UserRequestDto userRequestDto){
@@ -49,6 +53,16 @@ public class UserController {
     public User viewCompleteProfile(@PathVariable Long userId){
         return userService.viewCompleteUserProfile(userId);
     }
+
+    //Contact operations endpoints-------------------------------------------------------------------------------------------------------------
+
+    @PostMapping("/{userId}/add-contact")
+    public ContactResponseDto addContact(@PathVariable Long userId,@RequestBody String phoneNumber){
+        return contactService.addContact(phoneNumber, userId);
+
+    }
+
+
 
     }
 

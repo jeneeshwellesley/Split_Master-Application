@@ -68,7 +68,7 @@ public class Contacts {
         this.id = id;
     }
 
-    public long getUserId() {
+    public Long getUserId() {
         return user.getUserId();
     }
 

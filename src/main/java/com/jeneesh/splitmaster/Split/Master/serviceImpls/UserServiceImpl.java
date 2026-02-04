@@ -1,14 +1,15 @@
 package com.jeneesh.splitmaster.Split.Master.serviceImpls;
 
-import com.jeneesh.splitmaster.Split.Master.dto.UserLoginDto;
-import com.jeneesh.splitmaster.Split.Master.dto.UserRequestDto;
-import com.jeneesh.splitmaster.Split.Master.dto.UserResponseDto;
+import com.jeneesh.splitmaster.Split.Master.dto.*;
 import com.jeneesh.splitmaster.Split.Master.entities.User;
 import com.jeneesh.splitmaster.Split.Master.repositories.UserRepository;
 import com.jeneesh.splitmaster.Split.Master.services.UserService;
 import com.jeneesh.splitmaster.Split.Master.validations.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @Service
@@ -50,6 +51,10 @@ public class UserServiceImpl implements UserService {
         }
         User newUser = userRepository.findByPhoneNumber(user.getPhoneNumber());
 
+        if(!newUser.getPassword().equals(user.getPassword())){
+            throw new  RuntimeException("Passwords do not match");
+        }
+
         return new UserResponseDto(newUser.getUserId(), newUser.getUserName(),
                 newUser.getPhoneNumber(), newUser.getCreatedAt(),newUser.getUpdatedAt());
     }
@@ -71,7 +76,84 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateProfile(User user){
-        return null;
+    public UserResponseDto updateProfile(UserUpdateDto userUpdateDto, Long userId){
+            boolean userNameIsPre = false;
+            boolean phoneNumberIsPre = false;
+        if(userId == null){
+            throw new RuntimeException("Invalid UserId");
+        }
+
+        if(userRepository.existsByPhoneNumber(userUpdateDto.getPhoneNumber())){
+            throw new RuntimeException("Requested Phone Number already exists");
+        }
+
+
+        if(userUpdateDto.getUserName() != null) {
+            UserValidation.validUserName(userUpdateDto.getUserName());
+            userNameIsPre = true;
+        }
+        if(userUpdateDto.getPhoneNumber() != null) {
+            UserValidation.validPhoneNumber(userUpdateDto.getPhoneNumber());
+            phoneNumberIsPre = true;
+        }
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new  RuntimeException("User does not exist"));
+
+        if(userNameIsPre){
+            user.setUserName(userUpdateDto.getUserName());
+        }
+        if(phoneNumberIsPre){
+            user.setPhoneNumber(userUpdateDto.getPhoneNumber());
+        }
+        userRepository.save(user);
+
+        return new UserResponseDto(user.getUserId(),user.getUserName(), user.getPhoneNumber(), user.getCreatedAt(), LocalDateTime.now());
+
+    }
+
+    @Override
+    public String viewProfilePassword(Long userId) {
+        if(userId == null){
+            throw new RuntimeException("Invalid UserId");
+        }
+        User user = userRepository.findById(userId).orElseThrow(() -> new  RuntimeException("User does not exist"));
+        return "The user password is " + user.getPassword();
+    }
+
+    @Override
+    public String updatePassword(UserPasswordUpdateDto userPasswordUpdateDto, Long userId){
+        if(userId == null){
+            throw new RuntimeException("Invalid UserId");
+        }
+        User user = userRepository.findById(userId).orElseThrow(() -> new  RuntimeException("User does not exist"));
+
+        if(userPasswordUpdateDto.getNewPassword() != null || userPasswordUpdateDto.getOldPassword() != null){
+            if(!userPasswordUpdateDto.getNewPassword().equals(userPasswordUpdateDto.getOldPassword())){
+                if(user.getPassword().equals(userPasswordUpdateDto.getOldPassword())){
+                    user.setPassword(userPasswordUpdateDto.getNewPassword());
+                }
+                else {
+                    throw new RuntimeException("The old password do not match with the current password");
+                }
+            }
+            else{
+                throw new RuntimeException("The old password cannot be same as new password");
+            }
+        }
+        else{
+            throw new RuntimeException("Invalid old and new passwords");
+        }
+
+        userRepository.save(user);
+        return "Updated password is " + user.getPassword();
+    }
+
+    @Override
+    public User viewCompleteUserProfile(Long userId) {
+        if(userId == null){
+            throw new RuntimeException("Invalid UserId");
+        }
+        User user = userRepository.findById(userId).orElseThrow(() -> new  RuntimeException("User does not exist"));
+        return user;
     }
 }

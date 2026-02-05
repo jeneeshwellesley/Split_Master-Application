@@ -7,6 +7,8 @@ import com.jeneesh.splitmaster.Split.Master.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -57,9 +59,18 @@ public class UserController {
     //Contact operations endpoints-------------------------------------------------------------------------------------------------------------
 
     @PostMapping("/{userId}/add-contact")
-    public ContactResponseDto addContact(@PathVariable Long userId,@RequestBody String phoneNumber){
-        return contactService.addContact(phoneNumber, userId);
+    public ContactResponseDto addContact(@PathVariable Long userId,@RequestBody ContactRequestDto contactRequestDto){
+        return contactService.addContact(contactRequestDto, userId);
 
+    }
+    @DeleteMapping("/{userId}/delete-contact")
+    public ContactResponseDto deleteContact(@PathVariable Long userId,@RequestBody ContactRequestDto contactRequestDto){
+        return contactService.deleteContact(contactRequestDto, userId);
+    }
+
+    @GetMapping("/{userId}/view-contacts")
+    public List<ContactViewResponseDto> viewContacts(@PathVariable Long userId){
+        return contactService.viewContacts(userId);
     }
 
 

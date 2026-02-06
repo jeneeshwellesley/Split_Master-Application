@@ -11,5 +11,5 @@ public interface ContactService {
     ContactResponseDto addContact(ContactRequestDto contactRequestDto, Long userId);
     ContactResponseDto deleteContact(ContactRequestDto contactRequestDto, Long userId);
     List<ContactViewResponseDto> viewContacts(Long userId);
-    ContactResponseDto viewContact(String phoneNumber);
+    ContactResponseDto viewContact(ContactRequestDto contactRequestDto ,Long userId);
 }

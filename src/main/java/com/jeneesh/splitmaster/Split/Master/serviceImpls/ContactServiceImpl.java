@@ -111,7 +111,21 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public ContactResponseDto viewContact(String phoneNumber) {
-        return null;
+    public ContactResponseDto viewContact(ContactRequestDto contactRequestDto,Long userId) {
+        if(userId == null) {
+            throw new RuntimeException("Invalid user id");
+        }
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User id does not exist"));
+        UserValidation.validPassword(contactRequestDto.getPhoneNumber());
+        if(!userRepository.existsByPhoneNumber(contactRequestDto.getPhoneNumber())) {
+            throw new RuntimeException("The entered contact does not exist");
+        }
+        User contactUser = userRepository.findByPhoneNumber(contactRequestDto.getPhoneNumber());
+        if(!contactRepository.existsByUserAndContact(user, contactUser)) {
+            throw new RuntimeException("The entered contact is not in your contact list");
+        }
+
+        return new ContactResponseDto(contactUser.getUserName(),
+                contactUser.getPhoneNumber(), user.getUserName(), user.getPhoneNumber());
     }
 }

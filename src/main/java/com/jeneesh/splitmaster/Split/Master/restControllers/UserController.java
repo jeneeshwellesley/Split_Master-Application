@@ -73,6 +73,11 @@ public class UserController {
         return contactService.viewContacts(userId);
     }
 
+    @GetMapping("/{userId}/view-contact")
+    public ContactResponseDto viewContact(@PathVariable Long userId,@RequestBody ContactRequestDto contactRequestDto){
+        return contactService.viewContact(contactRequestDto,userId);
+    }
+
 
 
     }

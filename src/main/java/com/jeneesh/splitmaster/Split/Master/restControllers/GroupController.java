@@ -1,5 +1,7 @@
 package com.jeneesh.splitmaster.Split.Master.restControllers;
 
+import com.jeneesh.splitmaster.Split.Master.dto.ContactRequestDto;
+import com.jeneesh.splitmaster.Split.Master.dto.GroupParticipantsDto;
 import com.jeneesh.splitmaster.Split.Master.dto.GroupRequestDto;
 import com.jeneesh.splitmaster.Split.Master.dto.GroupResponseDto;
 import com.jeneesh.splitmaster.Split.Master.services.GroupService;
@@ -24,5 +26,12 @@ public class GroupController {
     @DeleteMapping("/{userId}/delete-group/{groupId}")
     public GroupResponseDto deleteContact(@PathVariable Long userId, @PathVariable Long groupId){
         return groupService.deleteGroup(userId, groupId);
+    }
+    @PostMapping("/{userId}/add-contact-to-group/{groupId}")
+    public GroupParticipantsDto addContactToGroup(@PathVariable Long userId,
+                                                  @PathVariable Long groupId,
+                                                  @RequestBody ContactRequestDto contactRequestDto){
+
+        return groupService.addContactToGroup(userId, contactRequestDto, groupId);
     }
 }

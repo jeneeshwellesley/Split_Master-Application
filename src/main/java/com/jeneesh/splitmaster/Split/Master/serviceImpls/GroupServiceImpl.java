@@ -1,9 +1,6 @@
 package com.jeneesh.splitmaster.Split.Master.serviceImpls;
 
-import com.jeneesh.splitmaster.Split.Master.dto.ContactRequestDto;
-import com.jeneesh.splitmaster.Split.Master.dto.GroupParticipantsDto;
-import com.jeneesh.splitmaster.Split.Master.dto.GroupRequestDto;
-import com.jeneesh.splitmaster.Split.Master.dto.GroupResponseDto;
+import com.jeneesh.splitmaster.Split.Master.dto.*;
 import com.jeneesh.splitmaster.Split.Master.entities.GroupParticipants;
 import com.jeneesh.splitmaster.Split.Master.entities.Groups;
 import com.jeneesh.splitmaster.Split.Master.entities.User;
@@ -15,6 +12,10 @@ import com.jeneesh.splitmaster.Split.Master.services.GroupService;
 import com.jeneesh.splitmaster.Split.Master.validations.UserValidation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class GroupServiceImpl implements GroupService {
@@ -81,7 +82,7 @@ public class GroupServiceImpl implements GroupService {
         Groups group = groupRepository.findById(groupId)
                 .orElseThrow(()->new RuntimeException("The group id does not exist to add a contact"));
 
-        if(groupParticipantsRepository.existsByMembersId(contactUser)){
+        if(groupParticipantsRepository.existsByMembersIdAndGroupId(contactUser,group)){
             throw new RuntimeException("The entered contact already exists in the group");
         }
 
@@ -93,6 +94,48 @@ public class GroupServiceImpl implements GroupService {
 
     }
 
+    @Override
+    public GroupParticipantsDto removeContactFromGroup(Long userId, ContactRequestDto contactRequestDto,Long groupId) {
+        if(userId == null){
+            throw new RuntimeException("Invalid user id");
+        }
+        if (!userRepository.existsById(userId)){
+            throw new NullPointerException("User does not exist");
+        }
+        UserValidation.validPhoneNumber(contactRequestDto.getPhoneNumber());
+        if(!userRepository.existsByPhoneNumber(contactRequestDto.getPhoneNumber())){
+            throw new RuntimeException("The entered phone number is not a user of this application");
+        }
+        User contactUser = userRepository.findByPhoneNumber(contactRequestDto.getPhoneNumber());
+        if(groupId==null){
+            throw new RuntimeException("The group id does not exist to remove a contact");
+        }
+        Groups group = groupRepository.findById(groupId).orElseThrow(()->new RuntimeException("The group does not exist"));
+        if(!groupParticipantsRepository.existsByMembersId(contactUser)){
+            throw new RuntimeException("The entered contact is not in your group");
+        }
+        GroupParticipants groupParticipants= groupParticipantsRepository.findByMembersId(contactUser);
+        groupParticipantsRepository.delete(groupParticipants);
+        return new GroupParticipantsDto(group.getGroupId(),group.getName(),contactUser.getUserId(),contactUser.getUserName(),"MEMBER");
+
+    }
+
+    @Override
+    public List<GroupParticipantsViewDto> getAllGroupsOfUser(Long userId) {
+        if(userId == null){
+            throw new RuntimeException("Invalid user id");
+        }
+        if(!userRepository.existsById(userId)){
+            throw new NullPointerException("User does not exist");
+        }
+        User user =  userRepository.findById(userId).orElseThrow(()->new RuntimeException("The user is not registered in the application"));
+        if (!groupParticipantsRepository.existsByMembersId(user)){
+            throw new RuntimeException("The entered user does not have any group or belongs to any group");
+        }
+        List<GroupParticipants>groupParticipants = groupParticipantsRepository.findAllByMembersId(user);
+        return groupParticipants.stream()
+                .map(c -> new GroupParticipantsViewDto((groupRepository.findById(c.getGroupId())).get().getName(),c.getRole())).toList();
+    }
 
 }
 

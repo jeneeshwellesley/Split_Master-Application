@@ -1,12 +1,11 @@
 package com.jeneesh.splitmaster.Split.Master.restControllers;
 
-import com.jeneesh.splitmaster.Split.Master.dto.ContactRequestDto;
-import com.jeneesh.splitmaster.Split.Master.dto.GroupParticipantsDto;
-import com.jeneesh.splitmaster.Split.Master.dto.GroupRequestDto;
-import com.jeneesh.splitmaster.Split.Master.dto.GroupResponseDto;
+import com.jeneesh.splitmaster.Split.Master.dto.*;
 import com.jeneesh.splitmaster.Split.Master.services.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/groups")
@@ -33,5 +32,18 @@ public class GroupController {
                                                   @RequestBody ContactRequestDto contactRequestDto){
 
         return groupService.addContactToGroup(userId, contactRequestDto, groupId);
+    }
+
+    @DeleteMapping("/{userId}/remove-contact/{groupId}")
+    public GroupParticipantsDto removeContactFromGroup(@PathVariable Long userId, @PathVariable Long groupId,
+                                                       @RequestBody ContactRequestDto contactRequestDto){
+
+        return groupService.removeContactFromGroup(userId, contactRequestDto, groupId);
+
+    }
+
+    @GetMapping("/{userId}/get-all-groups-of-user")
+    public List<GroupParticipantsViewDto> getAllGroupsOfUser(@PathVariable Long userId) {
+        return groupService.getAllGroupsOfUser(userId);
     }
 }

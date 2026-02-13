@@ -6,12 +6,14 @@ public class ExpenseRequestDto {
     private Long groupId;
     private String desc;
     private double totalAmount;
+    private double amountPaidByCreator;
     private List<ExpenseParticipantsDto>phoneNumbers;
 
     public ExpenseRequestDto(Long groupId,
-                             double totalAmount, String desc, List<ExpenseParticipantsDto> phoneNumbers) {
+                             double totalAmount,double amountPaidByCreator, String desc, List<ExpenseParticipantsDto> phoneNumbers) {
         this.groupId = groupId;
         this.totalAmount = totalAmount;
+        this.amountPaidByCreator = amountPaidByCreator;
         this.desc = desc;
         this.phoneNumbers = phoneNumbers;
     }
@@ -25,6 +27,7 @@ public class ExpenseRequestDto {
                 "groupId=" + groupId +
                 ", desc='" + desc + '\'' +
                 ", totalAmount=" + totalAmount +
+                ", amountPaidByCreator=" + amountPaidByCreator +
                 ", phoneNumbers=" + phoneNumbers +
                 '}';
     }
@@ -59,5 +62,13 @@ public class ExpenseRequestDto {
 
     public void setPhoneNumbers(List<ExpenseParticipantsDto> phoneNumbers) {
         this.phoneNumbers = phoneNumbers;
+    }
+
+    public double getAmountPaidByCreator() {
+        return amountPaidByCreator;
+    }
+
+    public void setAmountPaidByCreator(double amountPaidByCreator) {
+        this.amountPaidByCreator = amountPaidByCreator;
     }
 }

@@ -58,22 +58,20 @@ public class ExpenseServiceImpl implements ExpenseService {
         Expense expense = new Expense(group,user, expenseRequestDto.getDesc(),
                 expenseRequestDto.getTotalAmount());
         expenseRepository.save(expense);
-        int members = 1;
 
-        for(ExpenseParticipantsDto numbers : expenseRequestDto.getPhoneNumbers()){
-            members++;
-        }
+        int members = expenseRequestDto.getPhoneNumbers().size() + 1;
         double amount = expense.getTotalAmount() / members;
 
         boolean checkedUser = false;
         for(ExpenseParticipantsDto num : expenseRequestDto.getPhoneNumbers()){
             if(userId == expense.getCreatedBy() && !checkedUser){
+
                 ExpenseParticipants expenseParticipants = new ExpenseParticipants(expense,
-                        user,0,amount,0,1);
+                        user,amount,amount,0,1);
                 expenseParticipantsRepository.save(expenseParticipants);
                 checkedUser = true;
             }
-            else{
+
                 User tempUser = userRepository.findByPhoneNumber(num.getPhoneNumber());
                 UserValidation.validPhoneNumber(num.getPhoneNumber());
                 if(!contactRepository.existsByUserAndContact(user,tempUser)){
@@ -88,7 +86,6 @@ public class ExpenseServiceImpl implements ExpenseService {
                             tempUser, amount, 0, amount, 0);
                     expenseParticipantsRepository.save(expenseParticipants);
                 }
-            }
         }
 
         return new ExpenseResponseDto(group.getName(), group.getGroupId(),user.getUserId(), expense.getDescription(), expenseRequestDto.getPhoneNumbers());

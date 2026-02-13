@@ -13,6 +13,8 @@ public interface GroupParticipantsRepository extends JpaRepository<GroupParticip
     GroupParticipants findByMembersId (User contactUser);
     List<GroupParticipants> findAllByMembersId (User contactUser);
     boolean existsByMembersIdAndGroupId (User contactUser,Groups group);
+    GroupParticipants findByMembersIdAndGroupId(User user,Groups group);
+    void deleteByGroupId(Groups group);
 
 
 }

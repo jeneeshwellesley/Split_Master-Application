@@ -5,11 +5,11 @@ import com.jeneesh.splitmaster.Split.Master.entities.User;
 import com.jeneesh.splitmaster.Split.Master.repositories.UserRepository;
 import com.jeneesh.splitmaster.Split.Master.services.UserService;
 import com.jeneesh.splitmaster.Split.Master.validations.UserValidation;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 
 @Service
@@ -20,7 +20,7 @@ public class UserServiceImpl implements UserService {
         public UserServiceImpl(UserRepository userRepository){
             this.userRepository = userRepository;
         }
-
+    @Transactional
     @Override
     public UserResponseDto register(UserRequestDto user) {
             UserValidation.validUserName(user.getName());
@@ -40,7 +40,7 @@ public class UserServiceImpl implements UserService {
         }
 
     }
-
+    @Transactional
     @Override
     public UserResponseDto login(UserLoginDto user) {
         UserValidation.validPhoneNumber(user.getPhoneNumber());
@@ -61,20 +61,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto viewProfile(Long userId) {
-
             if(userId == null){
                 throw new RuntimeException("Invalid UserId");
             }
-
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User does not exist"));
-
             return new UserResponseDto(user.getUserId(), user.getUserName(), user.getPhoneNumber(),
                     user.getCreatedAt(), user.getUpdatedAt());
-
-
     }
-
+    @Transactional
     @Override
     public UserResponseDto updateProfile(UserUpdateDto userUpdateDto, Long userId){
             boolean userNameIsPre = false;
@@ -119,7 +114,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userId).orElseThrow(() -> new  RuntimeException("User does not exist"));
         return "The user password is " + user.getPassword();
     }
-
+    @Transactional
     @Override
     public String updatePassword(UserPasswordUpdateDto userPasswordUpdateDto, Long userId){
         if(userId == null){

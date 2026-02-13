@@ -9,12 +9,12 @@ import com.jeneesh.splitmaster.Split.Master.repositories.ContactRepository;
 import com.jeneesh.splitmaster.Split.Master.repositories.UserRepository;
 import com.jeneesh.splitmaster.Split.Master.services.ContactService;
 import com.jeneesh.splitmaster.Split.Master.validations.UserValidation;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ContactServiceImpl implements ContactService {
@@ -27,7 +27,7 @@ public class ContactServiceImpl implements ContactService {
         this.userRepository = userRepository;
     }
 
-
+    @Transactional
     @Override
     public ContactResponseDto addContact(ContactRequestDto contactRequestDto, Long userId) {
         if (userId == null) {
@@ -56,7 +56,7 @@ public class ContactServiceImpl implements ContactService {
             return new ContactResponseDto(contactUser.getUserName(), contactUser.getPhoneNumber(), user.getUserName(), user.getPhoneNumber());
 
     }
-
+    @Transactional
     @Override
     public ContactResponseDto deleteContact(ContactRequestDto  contactRequestDto, Long userId) {
         if(userId == null) {

@@ -10,11 +10,10 @@ import com.jeneesh.splitmaster.Split.Master.repositories.GroupRepository;
 import com.jeneesh.splitmaster.Split.Master.repositories.UserRepository;
 import com.jeneesh.splitmaster.Split.Master.services.GroupService;
 import com.jeneesh.splitmaster.Split.Master.validations.UserValidation;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,6 +31,7 @@ public class GroupServiceImpl implements GroupService {
         this.contactRepository = contactRepository;
         this.groupParticipantsRepository = groupParticipantsRepository;
     }
+    @Transactional
     @Override
     public GroupResponseDto createGroup(GroupRequestDto groupRequestDto,Long userId) {
         if(userId==null){
@@ -45,23 +45,33 @@ public class GroupServiceImpl implements GroupService {
         groupParticipantsRepository.save(groupParticipants);
         return new GroupResponseDto(group.getName(), userId);
     }
+    @Transactional
     @Override
     public GroupResponseDto deleteGroup(Long userId, Long groupId) {
         if(userId==null){
             throw new NullPointerException("userId is null");
         }
-        if(!userRepository.existsById(userId)){
-            throw new NullPointerException("User does not exist");
-        }
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("The user does not exist"));
         if(groupId==null){
             throw new NullPointerException("groupId is null");
         }
         Groups group = groupRepository.findById(groupId).orElseThrow(() -> new  RuntimeException("Group does not exist"));
+        if(!groupParticipantsRepository.existsByMembersIdAndGroupId(user,group)){
+            throw new RuntimeException("You are not a member of this group");
+        }
+        GroupParticipants groupParticipant = groupParticipantsRepository.findByMembersIdAndGroupId(user,group);
+        if(!groupParticipant.getRole().equals("ADMIN")){
+            throw new RuntimeException("You are not the admin to delete this group");
+        }
+
+
+        groupParticipantsRepository.deleteByGroupId(group);
         groupRepository.delete(group);
 
         return new GroupResponseDto(group.getName(), group.getCreatedBy());
     }
 
+    @Transactional
     @Override
     public GroupParticipantsDto addContactToGroup(Long userId, ContactRequestDto contactRequestDto,Long groupId) {
         if(userId == null){
@@ -81,10 +91,14 @@ public class GroupServiceImpl implements GroupService {
         }
         Groups group = groupRepository.findById(groupId)
                 .orElseThrow(()->new RuntimeException("The group id does not exist to add a contact"));
+        if(!groupRepository.existsByGroupIdAndCreatedBy(groupId,user)){
+            throw new RuntimeException("The entered group id is not yours");
+        }
 
         if(groupParticipantsRepository.existsByMembersIdAndGroupId(contactUser,group)){
             throw new RuntimeException("The entered contact already exists in the group");
         }
+
 
 
         GroupParticipants groupParticipants = new GroupParticipants(group,contactUser,"MEMBER");
@@ -93,7 +107,7 @@ public class GroupServiceImpl implements GroupService {
                 contactUser.getUserId(),contactUser.getUserName(),"MEMBER");
 
     }
-
+    @Transactional
     @Override
     public GroupParticipantsDto removeContactFromGroup(Long userId, ContactRequestDto contactRequestDto,Long groupId) {
         if(userId == null){
@@ -136,6 +150,9 @@ public class GroupServiceImpl implements GroupService {
         return groupParticipants.stream()
                 .map(c -> new GroupParticipantsViewDto((groupRepository.findById(c.getGroupId())).get().getName(),c.getRole())).toList();
     }
+
+
+
 
 }
 

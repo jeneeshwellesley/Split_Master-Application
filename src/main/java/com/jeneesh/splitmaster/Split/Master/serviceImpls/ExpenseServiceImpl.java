@@ -38,56 +38,11 @@ public class ExpenseServiceImpl implements ExpenseService {
         this.expenseParticipantsRepository = expenseParticipantsRepository;
         this.groupParticipantsRepository = groupParticipantsRepository;
     }
-
-
     @Override
-    public ExpenseResponseDto createSplit(Long userId, ExpenseRequestDto expenseRequestDto) {
-        if(userId == null || !userRepository.existsById(userId)){
-            throw new RuntimeException("Invalid User id");
-        }
-        User user = userRepository.findById(userId).orElseThrow(()->new RuntimeException("User does not exist"));
-        Groups group = groupRepository.findById(expenseRequestDto.getGroupId()).orElseThrow(()
-                -> new RuntimeException("Group does not exist with the given group id"));
-        if(!groupRepository.existsByGroupIdAndCreatedBy(group.getGroupId(), user)){
-            throw new RuntimeException("You don't have a group related to the group id");
-        }
-
-        if(expenseRequestDto.getTotalAmount() <=0){
-            throw new RuntimeException("Invalid total amount");
-        }
-        Expense expense = new Expense(group,user, expenseRequestDto.getDesc(),
-                expenseRequestDto.getTotalAmount());
-        expenseRepository.save(expense);
-
-        int members = expenseRequestDto.getPhoneNumbers().size() + 1;
-        double amount = expense.getTotalAmount() / members;
-
-        boolean checkedUser = false;
-        for(ExpenseParticipantsDto num : expenseRequestDto.getPhoneNumbers()){
-            if(userId == expense.getCreatedBy() && !checkedUser){
-
-                ExpenseParticipants expenseParticipants = new ExpenseParticipants(expense,
-                        user,amount,amount,0,1);
-                expenseParticipantsRepository.save(expenseParticipants);
-                checkedUser = true;
-            }
-
-                User tempUser = userRepository.findByPhoneNumber(num.getPhoneNumber());
-                UserValidation.validPhoneNumber(num.getPhoneNumber());
-                if(!contactRepository.existsByUserAndContact(user,tempUser)){
-                    throw new RuntimeException("One of the numbers is not in your contact list");
-                }
-                if(!groupParticipantsRepository.existsByMembersIdAndGroupId(tempUser,group)){
-                    throw new RuntimeException("One of the numbers you entered is not in your group");
-                }
-
-                else {
-                    ExpenseParticipants expenseParticipants = new ExpenseParticipants(expense,
-                            tempUser, amount, 0, amount, 0);
-                    expenseParticipantsRepository.save(expenseParticipants);
-                }
-        }
-
-        return new ExpenseResponseDto(group.getName(), group.getGroupId(),user.getUserId(), expense.getDescription(), expenseRequestDto.getPhoneNumbers());
+    public ExpenseResponseDto createSplit(Long userId,ExpenseRequestDto expenseRequestDto){
+        return null;
     }
+
+
+
 }

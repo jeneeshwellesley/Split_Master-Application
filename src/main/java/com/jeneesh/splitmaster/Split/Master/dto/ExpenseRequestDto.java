@@ -4,30 +4,27 @@ import java.util.List;
 
 public class ExpenseRequestDto {
     private Long groupId;
-    private String desc;
     private double totalAmount;
-    private double amountPaidByCreator;
+    private double paidByCreator;
+    private String desc;
     private List<ExpenseParticipantsDto>phoneNumbers;
+    public ExpenseRequestDto() {}
 
-    public ExpenseRequestDto(Long groupId,
-                             double totalAmount,double amountPaidByCreator, String desc, List<ExpenseParticipantsDto> phoneNumbers) {
+    public ExpenseRequestDto(Long groupId, double totalAmount, double paidByCreator, String desc, List<ExpenseParticipantsDto> phoneNumbers) {
         this.groupId = groupId;
         this.totalAmount = totalAmount;
-        this.amountPaidByCreator = amountPaidByCreator;
+        this.paidByCreator = paidByCreator;
         this.desc = desc;
         this.phoneNumbers = phoneNumbers;
-    }
-
-    public ExpenseRequestDto() {
     }
 
     @Override
     public String toString() {
         return "ExpenseRequestDto{" +
                 "groupId=" + groupId +
-                ", desc='" + desc + '\'' +
                 ", totalAmount=" + totalAmount +
-                ", amountPaidByCreator=" + amountPaidByCreator +
+                ", paidByCreator=" + paidByCreator +
+                ", desc='" + desc + '\'' +
                 ", phoneNumbers=" + phoneNumbers +
                 '}';
     }
@@ -40,20 +37,20 @@ public class ExpenseRequestDto {
         this.groupId = groupId;
     }
 
-    public String getDesc() {
-        return desc;
-    }
-
-    public void setDesc(String desc) {
-        this.desc = desc;
-    }
-
     public double getTotalAmount() {
         return totalAmount;
     }
 
     public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public double getPaidByCreator() {
+        return paidByCreator;
+    }
+
+    public void setPaidByCreator(double paidByCreator) {
+        this.paidByCreator = paidByCreator;
     }
 
     public List<ExpenseParticipantsDto> getPhoneNumbers() {
@@ -64,11 +61,11 @@ public class ExpenseRequestDto {
         this.phoneNumbers = phoneNumbers;
     }
 
-    public double getAmountPaidByCreator() {
-        return amountPaidByCreator;
+    public String getDesc() {
+        return desc;
     }
 
-    public void setAmountPaidByCreator(double amountPaidByCreator) {
-        this.amountPaidByCreator = amountPaidByCreator;
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 }

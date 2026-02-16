@@ -7,15 +7,14 @@ public class ExpenseResponseDto {
     private Long groupId;
     private Long createdBy;
     private String desc;
-    private List<ExpenseParticipantsDto>phoneNumber;
+    private List<ExpenseParticipantsDto>numbers;
 
-    public ExpenseResponseDto(String groupName, Long groupId,
-                              Long createdBy, String desc, List<ExpenseParticipantsDto> phoneNumber) {
+    public ExpenseResponseDto(String groupName, Long groupId, Long createdBy, String desc, List<ExpenseParticipantsDto> numbers) {
         this.groupName = groupName;
         this.groupId = groupId;
         this.createdBy = createdBy;
         this.desc = desc;
-        this.phoneNumber = phoneNumber;
+        this.numbers = numbers;
     }
 
     public ExpenseResponseDto() {
@@ -29,7 +28,7 @@ public class ExpenseResponseDto {
                 ", groupId=" + groupId +
                 ", createdBy=" + createdBy +
                 ", desc='" + desc + '\'' +
-                ", phoneNumber=" + phoneNumber +
+                ", numbers=" + numbers +
                 '}';
     }
 
@@ -49,14 +48,6 @@ public class ExpenseResponseDto {
         this.groupId = groupId;
     }
 
-    public Long getCreatedBy() {
-        return createdBy;
-    }
-
-    public void setCreatedBy(Long createdBy) {
-        this.createdBy = createdBy;
-    }
-
     public String getDesc() {
         return desc;
     }
@@ -65,11 +56,19 @@ public class ExpenseResponseDto {
         this.desc = desc;
     }
 
-    public List<ExpenseParticipantsDto> getPhoneNumber() {
-        return phoneNumber;
+    public Long getCreatedBy() {
+        return createdBy;
     }
 
-    public void setPhoneNumber(List<ExpenseParticipantsDto> phoneNumber) {
-        this.phoneNumber = phoneNumber;
+    public void setCreatedBy(Long createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public List<ExpenseParticipantsDto> getNumbers() {
+        return numbers;
+    }
+
+    public void setNumbers(List<ExpenseParticipantsDto> numbers) {
+        this.numbers = numbers;
     }
 }

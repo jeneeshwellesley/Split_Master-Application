@@ -21,6 +21,10 @@ public class ExpenseParticipants {
     private Expense expenseId;
 
     @ManyToOne
+    @JoinColumn(name = "group_id",nullable = false)
+    private Groups groupId;
+
+    @ManyToOne
     @JoinColumn(name = "user_id",nullable = false)
     private User userId;
 
@@ -49,9 +53,10 @@ public class ExpenseParticipants {
 
     }
 
-    public ExpenseParticipants(Expense expenseId, User userId, double ownedAmount,
+    public ExpenseParticipants(Expense expenseId,Groups groupId, User userId, double ownedAmount,
                                double paidAmount,double remainingAmount,int installmentCount){
         this.expenseId = expenseId;
+        this.groupId = groupId;
         this.userId = userId;
         this.ownedAmount = ownedAmount;
         this.paidAmount = paidAmount;
@@ -63,13 +68,13 @@ public class ExpenseParticipants {
 
     //ToString method--------------------------------------------------------------------
 
-
     @Override
     public String toString() {
         return "ExpenseParticipants{" +
                 "id=" + id +
-                ", expenseId=" + expenseId.getExpenseId() +
-                ", userId=" + userId.getUserId() +
+                ", expenseId=" + expenseId +
+                ", groupId=" + groupId +
+                ", userId=" + userId +
                 ", ownedAmount=" + ownedAmount +
                 ", paidAmount=" + paidAmount +
                 ", remainingAmount=" + remainingAmount +
@@ -78,6 +83,7 @@ public class ExpenseParticipants {
                 ", updatedAt=" + updatedAt +
                 '}';
     }
+
 
     //Getters and Setters-----------------------------------------------------------------------
 
@@ -152,5 +158,13 @@ public class ExpenseParticipants {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Groups getGroupId() {
+        return groupId;
+    }
+
+    public void setGroupId(Groups groupId) {
+        this.groupId = groupId;
     }
 }

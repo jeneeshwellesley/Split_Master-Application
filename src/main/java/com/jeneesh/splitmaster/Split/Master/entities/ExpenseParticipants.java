@@ -34,17 +34,9 @@ public class ExpenseParticipants {
     @Column(name = "paid_amount")
     private double paidAmount;
 
-    @Column(name = "remaining_amount")
-    private double remainingAmount;
-
-    @Column(name = "installment_count")
-    private int installmentCount;
-
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
 
     //Constructors-------------------------------------------------------------------
@@ -54,16 +46,13 @@ public class ExpenseParticipants {
     }
 
     public ExpenseParticipants(Expense expenseId,Groups groupId, User userId, double ownedAmount,
-                               double paidAmount,double remainingAmount,int installmentCount){
+                               double paidAmount){
         this.expenseId = expenseId;
         this.groupId = groupId;
         this.userId = userId;
         this.ownedAmount = ownedAmount;
         this.paidAmount = paidAmount;
-        this.remainingAmount = remainingAmount;
-        this.installmentCount = installmentCount;
         this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
     }
 
     //ToString method--------------------------------------------------------------------
@@ -77,10 +66,7 @@ public class ExpenseParticipants {
                 ", userId=" + userId +
                 ", ownedAmount=" + ownedAmount +
                 ", paidAmount=" + paidAmount +
-                ", remainingAmount=" + remainingAmount +
-                ", installmentCount=" + installmentCount +
                 ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
                 '}';
     }
 
@@ -128,22 +114,6 @@ public class ExpenseParticipants {
         this.paidAmount = paidAmount;
     }
 
-    public double getRemainingAmount() {
-        return remainingAmount;
-    }
-
-    public void setRemainingAmount(double remainingAmount) {
-        this.remainingAmount = remainingAmount;
-    }
-
-    public int getInstallmentCount() {
-        return installmentCount;
-    }
-
-    public void setInstallmentCount(int installmentCount) {
-        this.installmentCount = installmentCount;
-    }
-
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -152,13 +122,6 @@ public class ExpenseParticipants {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 
     public Groups getGroupId() {
         return groupId;

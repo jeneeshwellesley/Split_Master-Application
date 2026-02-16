@@ -8,6 +8,7 @@ public class ExpenseRequestDto {
     private double paidByCreator;
     private String desc;
     private List<ExpenseParticipantsDto>phoneNumbers;
+    private List<ContactRequestDto> contacts;
     public ExpenseRequestDto() {}
 
     public ExpenseRequestDto(Long groupId, double totalAmount, double paidByCreator, String desc, List<ExpenseParticipantsDto> phoneNumbers) {
@@ -17,6 +18,14 @@ public class ExpenseRequestDto {
         this.desc = desc;
         this.phoneNumbers = phoneNumbers;
     }
+    public ExpenseRequestDto(Long groupId, double totalAmount, List<ContactRequestDto> contacts,String  desc) {
+        this.groupId = groupId;
+        this.totalAmount = totalAmount;
+        this.desc = desc;
+        this.contacts = contacts;
+    }
+
+
 
     @Override
     public String toString() {
@@ -67,5 +76,13 @@ public class ExpenseRequestDto {
 
     public void setDesc(String desc) {
         this.desc = desc;
+    }
+
+    public List<ContactRequestDto> getContacts() {
+        return contacts;
+    }
+
+    public void setContacts(List<ContactRequestDto> contacts) {
+        this.contacts = contacts;
     }
 }

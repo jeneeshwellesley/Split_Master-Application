@@ -16,8 +16,14 @@ public class ExpenseController {
         this.expenseService = expenseService;
     }
 
-    @PostMapping("/{userId}/createSplit")
-    public ExpenseResponseDto createSplit(@PathVariable Long userId, @RequestBody ExpenseRequestDto expenseRequestDto){
-       return expenseService.createSplit(userId, expenseRequestDto);
+    @PostMapping("/{userId}/createSplitManual")
+    public ExpenseResponseDto createSplitManual(@PathVariable Long userId, @RequestBody ExpenseRequestDto expenseRequestDto){
+       return expenseService.createSplitManual(userId, expenseRequestDto);
     }
+
+    @PostMapping("/{userId}/createSplitAuto")
+    public ExpenseResponseDto createSplitAuto(@PathVariable Long userId, @RequestBody ExpenseRequestDto expenseRequestDto){
+        return null;
+    }
+
 }

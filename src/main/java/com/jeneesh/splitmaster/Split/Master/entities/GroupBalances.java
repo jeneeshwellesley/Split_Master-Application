@@ -4,7 +4,7 @@ package com.jeneesh.splitmaster.Split.Master.entities;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name ="group_balances")
+@Table(name = "group_balances")
 public class GroupBalances {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -12,28 +12,28 @@ public class GroupBalances {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "group_id",nullable = false)
+    @JoinColumn(name = "group_id")
     private Groups groupId;
 
     @ManyToOne
-    @JoinColumn(name ="payer_id")
+    @JoinColumn(name = "payer_id")
     private User payerId;
 
     @ManyToOne
-    @JoinColumn(name = "receiver_id")
+    @JoinColumn(name ="receiver_id")
     private User receiverId;
 
-    @Column
-    private Double amount;
+    @Column(name ="amount")
+    private double amount;
 
-    public GroupBalances(Groups groupId, User payerId, User receiverId, Double amount) {
+    public GroupBalances() {
+    }
+
+    public GroupBalances (Groups groupId, User payerId, User receiverId, double amount) {
         this.groupId = groupId;
         this.payerId = payerId;
         this.receiverId = receiverId;
         this.amount = amount;
-    }
-
-    public GroupBalances() {
     }
 
     @Override
@@ -79,11 +79,11 @@ public class GroupBalances {
         this.receiverId = receiverId;
     }
 
-    public Double getAmount() {
+    public double getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(double amount) {
         this.amount = amount;
     }
 }

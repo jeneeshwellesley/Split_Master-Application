@@ -9,7 +9,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -68,6 +67,8 @@ public class ExpenseServiceImpl implements ExpenseService {
             throw new RuntimeException("Minimum 1 Rupee per person is allowed");
         }
         for (ExpenseParticipantsDto num : expenseRequestDto.getPhoneNumbers()) {
+            User tempUser = userRepository.findByPhoneNumber(num.getPhoneNumber());
+            UserValidation.validPhoneNumber(num.getPhoneNumber());
             totalAmountPaid += num.getAmount();
             if (num.getPhoneNumber().equalsIgnoreCase(user.getPhoneNumber())) {
                 throw new RuntimeException("User phone number cannot be in tne participants");
@@ -77,7 +78,14 @@ public class ExpenseServiceImpl implements ExpenseService {
             }
             if (num.getAmount() < hasToPay || num.getAmount() > hasToPay) {
                 throw new RuntimeException("One of the participants are paying the invalid split amount");
-            } else {
+            }
+            if (!userRepository.existsByPhoneNumber(num.getPhoneNumber())) {
+                throw new RuntimeException("Phone number not found");
+            }
+            if (!groupParticipantsRepository.existsByMembersIdAndGroupId(tempUser, group)) {
+                throw new RuntimeException("One of the numbers you entered is not in your group");
+            }
+            else {
                 numSet.add(num.getPhoneNumber());
             }
         }
@@ -99,17 +107,9 @@ public class ExpenseServiceImpl implements ExpenseService {
 
 
         for (ExpenseParticipantsDto num : expenseRequestDto.getPhoneNumbers()) {
-            UserValidation.validPhoneNumber(num.getPhoneNumber());
-            if (!userRepository.existsByPhoneNumber(num.getPhoneNumber())) {
-                throw new RuntimeException("Phone number not found");
-            }
             User tempUser = userRepository.findByPhoneNumber(num.getPhoneNumber());
-            if (!groupParticipantsRepository.existsByMembersIdAndGroupId(tempUser, group)) {
-                throw new RuntimeException("One of the numbers you entered is not in your group");
-            }
             ExpenseParticipants expenseParticipants = new ExpenseParticipants(expense, group, tempUser, num.getAmount(), 0);
             expenseParticipantsRepository.save(expenseParticipants);
-
             if (groupBalancesRepository.existsByGroupIdAndPayerIdAndReceiverId(group, user, tempUser)) {
                 GroupBalances creatorGroupBalance = groupBalancesRepository.findByGroupIdAndPayerIdAndReceiverId(group, user, tempUser).orElseThrow(() ->
                         new RuntimeException("Group balances not found"));
@@ -142,6 +142,8 @@ public class ExpenseServiceImpl implements ExpenseService {
         return new ExpenseResponseDto(group.getName(), group.getGroupId(), userId,
                 expenseRequestDto.getDesc(), expenseRequestDto.getPhoneNumbers());
     }
+
+
 
     @Override
     @Transactional
@@ -225,5 +227,12 @@ public class ExpenseServiceImpl implements ExpenseService {
         return new ExpenseResponseDto(group.getName(), group.getGroupId(), userId,
                 expenseRequestDto.getDesc(), expenseRequestDto.getPhoneNumbers());
     }
+
+    @Override
+    public ExpensePaidResponseDto paySplit(Long userId, ExpensePayRequestDto expensePayRequestDto) {
+        return null;
+    }
+
+
 }
 

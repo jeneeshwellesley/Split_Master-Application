@@ -1,8 +1,6 @@
 package com.jeneesh.splitmaster.Split.Master.serviceImpls;
 
-import com.jeneesh.splitmaster.Split.Master.dto.ExpenseParticipantsDto;
-import com.jeneesh.splitmaster.Split.Master.dto.ExpenseRequestDto;
-import com.jeneesh.splitmaster.Split.Master.dto.ExpenseResponseDto;
+import com.jeneesh.splitmaster.Split.Master.dto.*;
 import com.jeneesh.splitmaster.Split.Master.entities.*;
 import com.jeneesh.splitmaster.Split.Master.repositories.*;
 import com.jeneesh.splitmaster.Split.Master.services.ExpenseService;
@@ -12,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.swing.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class ExpenseServiceImpl implements ExpenseService {
@@ -22,8 +22,6 @@ public class ExpenseServiceImpl implements ExpenseService {
     private ContactRepository contactRepository;
     private ExpenseParticipantsRepository expenseParticipantsRepository;
     private GroupBalancesRepository groupBalancesRepository;
-
-
 
 
     @Autowired
@@ -44,92 +42,188 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Transactional
     @Override
-    public ExpenseResponseDto createSplitManual(Long userId,ExpenseRequestDto expenseRequestDto){
+    public ExpenseResponseDto createSplitManual(Long userId, ExpenseRequestDto expenseRequestDto) {
         int members = expenseRequestDto.getPhoneNumbers().size() + 1;
-        int totalAmountPaid = 0;
-        if(userId == null){
+        double totalAmountPaid = 0;
+        double hasToPay =
+                (expenseRequestDto.getTotalAmount() -
+                        expenseRequestDto.getPaidByCreator())
+                        / (members - 1);
+        System.out.println("The split amount is -> " + hasToPay);
+        Set<String> numSet = new HashSet<>();
+        if (userId == null) {
             throw new RuntimeException("Invalid user id");
+        }
+        if (expenseRequestDto == null) {
+            throw new RuntimeException("Invalid expense request");
         }
 
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        if(expenseRequestDto == null){
-            throw new RuntimeException("Invalid expense request");
-        }
         Groups group = groupRepository.findById(expenseRequestDto.getGroupId()).orElseThrow(() ->
                 new RuntimeException("Group not found"));
-        if(!groupRepository.existsByGroupIdAndCreatedBy(expenseRequestDto.getGroupId(), user)){
+        if (!groupParticipantsRepository.existsByMembersIdAndGroupId(user, group)) {
             throw new RuntimeException("You don't have a group with that group id ");
         }
-
-        if(expenseRequestDto.getTotalAmount() < members){
-            throw new  RuntimeException("Minimum 1 Rupee per person is allowed");
+        if (expenseRequestDto.getTotalAmount() < members) {
+            throw new RuntimeException("Minimum 1 Rupee per person is allowed");
         }
-        for(ExpenseParticipantsDto num : expenseRequestDto.getPhoneNumbers()){
+        for (ExpenseParticipantsDto num : expenseRequestDto.getPhoneNumbers()) {
             totalAmountPaid += num.getAmount();
+            if (num.getPhoneNumber().equalsIgnoreCase(user.getPhoneNumber())) {
+                throw new RuntimeException("User phone number cannot be in tne participants");
+            }
+            if (numSet.contains(num.getPhoneNumber())) {
+                throw new RuntimeException("You have entered the same number more than once");
+            }
+            if (num.getAmount() < hasToPay || num.getAmount() > hasToPay) {
+                throw new RuntimeException("One of the participants are paying the invalid split amount");
+            } else {
+                numSet.add(num.getPhoneNumber());
+            }
         }
-        if(totalAmountPaid > expenseRequestDto.getTotalAmount()){
+        if (totalAmountPaid > expenseRequestDto.getTotalAmount()) {
             throw new RuntimeException("Amount paid by users exceed total amount");
         }
-        if(expenseRequestDto.getPaidByCreator() > expenseRequestDto.getTotalAmount() - (members - 1)){
+        if (expenseRequestDto.getPaidByCreator() > expenseRequestDto.getTotalAmount() - (members - 1)) {
             throw new RuntimeException("Leave minimum 1 rupee per person");
         }
+        if (totalAmountPaid + expenseRequestDto.getPaidByCreator() > expenseRequestDto.getTotalAmount()) {
+            throw new RuntimeException("The amount paid by you and the participants exceed te total amount");
+        }
 
-        Expense expense = new Expense(group,user,expenseRequestDto.getDesc(),expenseRequestDto.getTotalAmount());
+        Expense expense = new Expense(group, user, expenseRequestDto.getDesc(), expenseRequestDto.getTotalAmount());
         expenseRepository.save(expense);
+        ExpenseParticipants creatorExpense = new ExpenseParticipants(expense, group, user,
+                expenseRequestDto.getPaidByCreator(), expenseRequestDto.getPaidByCreator());
+        expenseParticipantsRepository.save(creatorExpense);
 
 
-        for(ExpenseParticipantsDto num : expenseRequestDto.getPhoneNumbers()){
+        for (ExpenseParticipantsDto num : expenseRequestDto.getPhoneNumbers()) {
             UserValidation.validPhoneNumber(num.getPhoneNumber());
-            if(!userRepository.existsByPhoneNumber(num.getPhoneNumber())){
-                throw new  RuntimeException("Phone number not found");
+            if (!userRepository.existsByPhoneNumber(num.getPhoneNumber())) {
+                throw new RuntimeException("Phone number not found");
             }
             User tempUser = userRepository.findByPhoneNumber(num.getPhoneNumber());
-            if(!contactRepository.existsByUserAndContact(user,tempUser)){
-                throw new RuntimeException("One of the numbers is not in your contact list");
-            }
-            if(!groupParticipantsRepository.existsByMembersIdAndGroupId(tempUser,group)){
+            if (!groupParticipantsRepository.existsByMembersIdAndGroupId(tempUser, group)) {
                 throw new RuntimeException("One of the numbers you entered is not in your group");
             }
-            ExpenseParticipants expenseParticipants = new ExpenseParticipants(expense,group,tempUser, num.getAmount(), 0);
+            ExpenseParticipants expenseParticipants = new ExpenseParticipants(expense, group, tempUser, num.getAmount(), 0);
+            expenseParticipantsRepository.save(expenseParticipants);
 
-            if(groupBalancesRepository.existsByGroupIdAndPayerIdAndReceiverId(group,user,tempUser)){
-                GroupBalances creatorGroupBalance = groupBalancesRepository.findByGroupIdAndPayerIdAndReceiverId(group,user,tempUser).orElseThrow(() ->
+            if (groupBalancesRepository.existsByGroupIdAndPayerIdAndReceiverId(group, user, tempUser)) {
+                GroupBalances creatorGroupBalance = groupBalancesRepository.findByGroupIdAndPayerIdAndReceiverId(group, user, tempUser).orElseThrow(() ->
                         new RuntimeException("Group balances not found"));
                 double creatorAmount = creatorGroupBalance.getAmount();
                 double participantAmount = expenseParticipants.getOwnedAmount();
 
-                if(creatorAmount > participantAmount){
+                if (creatorAmount > participantAmount) {
                     creatorAmount = creatorAmount - participantAmount;
                     creatorGroupBalance.setAmount(creatorAmount);
                     groupBalancesRepository.save(creatorGroupBalance);
-                }
-                else if(participantAmount > creatorAmount){
+                } else if (participantAmount > creatorAmount) {
                     participantAmount = participantAmount - creatorAmount;
                     groupBalancesRepository.delete(creatorGroupBalance);
-                    GroupBalances groupBalances = new GroupBalances(group,tempUser,user,participantAmount);
+                    GroupBalances groupBalances = new GroupBalances(group, tempUser, user, participantAmount);
                     groupBalancesRepository.save(groupBalances);
-                }
-                else if(creatorAmount  ==  participantAmount){
+                } else if (creatorAmount == participantAmount) {
                     groupBalancesRepository.delete(creatorGroupBalance);
                 }
-            }
-            else if(groupBalancesRepository.existsByGroupIdAndPayerIdAndReceiverId(group,tempUser,user)){
-                GroupBalances groupBalances = groupBalancesRepository.findByGroupIdAndPayerIdAndReceiverId(group,tempUser,user).orElse(null);
+            } else if (groupBalancesRepository.existsByGroupIdAndPayerIdAndReceiverId(group, tempUser, user)) {
+                GroupBalances groupBalances = groupBalancesRepository.findByGroupIdAndPayerIdAndReceiverId(group, tempUser, user).orElse(null);
                 double groupBalancesAmount = groupBalances.getAmount();
                 groupBalances.setAmount(groupBalancesAmount + num.getAmount());
                 groupBalancesRepository.save(groupBalances);
-            }
-            else{
-                GroupBalances groupBalances = new GroupBalances(group,tempUser,user,num.getAmount());
+            } else {
+                GroupBalances groupBalances = new GroupBalances(group, tempUser, user, num.getAmount());
                 groupBalancesRepository.save(groupBalances);
             }
 
         }
-        return new ExpenseResponseDto(group.getName(),group.getGroupId(),userId,
-                expenseRequestDto.getDesc(),expenseRequestDto.getPhoneNumbers());
-
+        return new ExpenseResponseDto(group.getName(), group.getGroupId(), userId,
+                expenseRequestDto.getDesc(), expenseRequestDto.getPhoneNumbers());
     }
 
+    @Override
+    @Transactional
+    public ExpenseResponseDto createSplitAuto(Long userId, ExpenseRequestDto expenseRequestDto) {
+        Set<String> numSet = new HashSet<>();
+        int members = expenseRequestDto.getContacts().size() + 1;
+        double hasToPay = expenseRequestDto.getTotalAmount() - expenseRequestDto.getPaidByCreator() / (members - 1);
+        if (userId == null) {
+            throw new RuntimeException("Invalid user id");
+        }
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        Groups group = groupRepository.findById(expenseRequestDto.getGroupId()).orElseThrow(() -> new RuntimeException("Group not found"));
+        if (!groupParticipantsRepository.existsByMembersIdAndGroupId(user, group)) {
+            throw new RuntimeException("You are not a member of this group");
+        }
+        if (expenseRequestDto.getPaidByCreator() >= expenseRequestDto.getTotalAmount()) {
+            throw new RuntimeException("Leave minimum 1 Rupee per person for split");
+        }
+        for (ContactRequestDto num : expenseRequestDto.getContacts()) {
+            UserValidation.validPhoneNumber(num.getPhoneNumber());
+            User tempUser = userRepository.findByPhoneNumber(num.getPhoneNumber());
+            if (!userRepository.existsByPhoneNumber(num.getPhoneNumber())) {
+                throw new RuntimeException("Phone number not found");
+            }
+            if (groupParticipantsRepository.existsByMembersIdAndGroupId(tempUser, group)) {
+                throw new RuntimeException("One of the numbers you entered is not in your group");
+            }
 
+            if (numSet.contains(num.getPhoneNumber())) {
+                throw new RuntimeException("Cannot have duplicates in participants");
+            }
+            if (num.getPhoneNumber().equals(user.getPhoneNumber())) {
+                throw new RuntimeException("User number cannot be in the participants");
+            } else {
+                numSet.add(num.getPhoneNumber());
+            }
+        }
 
+        Expense expense = new Expense(group, user, expenseRequestDto.getDesc(), expenseRequestDto.getTotalAmount());
+        expenseRepository.save(expense);
+        ExpenseParticipants expenseParticipants = new ExpenseParticipants(expense, group, user,
+                expenseRequestDto.getPaidByCreator(), expenseRequestDto.getPaidByCreator());
+        expenseParticipantsRepository.save(expenseParticipants);
+
+        for (String num : numSet) {
+            User temperUser = userRepository.findByPhoneNumber(num);
+            ExpenseParticipants expenseParticipant2 = new ExpenseParticipants(expense, group, temperUser, hasToPay, 0);
+            expenseParticipantsRepository.save(expenseParticipant2);
+
+            if (groupBalancesRepository.existsByGroupIdAndPayerIdAndReceiverId(group, user, temperUser)) {
+                GroupBalances creatorGroupBalance = groupBalancesRepository.findByGroupIdAndPayerIdAndReceiverId(group, user, temperUser)
+                        .orElse(null);
+
+                double creatorAmount = creatorGroupBalance.getAmount();
+                double participantAmount = expenseParticipants.getOwnedAmount();
+
+                if (creatorAmount > participantAmount) {
+                    creatorAmount = creatorAmount - participantAmount;
+                    creatorGroupBalance.setAmount(creatorAmount);
+                    groupBalancesRepository.save(creatorGroupBalance);
+                } else if (participantAmount > creatorAmount) {
+                    participantAmount = participantAmount - creatorAmount;
+                    groupBalancesRepository.delete(creatorGroupBalance);
+                    GroupBalances groupBalances = new GroupBalances(group, temperUser, user, participantAmount);
+                    groupBalancesRepository.save(groupBalances);
+                } else if (creatorAmount == participantAmount) {
+                    groupBalancesRepository.delete(creatorGroupBalance);
+                }
+            } else if (groupBalancesRepository.existsByGroupIdAndPayerIdAndReceiverId(group, temperUser, user)) {
+                GroupBalances groupBalances = groupBalancesRepository.findByGroupIdAndPayerIdAndReceiverId(group, temperUser, user)
+                        .orElse(null);
+                double groupBalancesAmount = groupBalances.getAmount();
+                groupBalances.setAmount(groupBalancesAmount + expenseParticipant2.getOwnedAmount());
+                groupBalancesRepository.save(groupBalances);
+            } else {
+                GroupBalances groupBalances = new GroupBalances(group, temperUser, user, expenseParticipant2.getOwnedAmount());
+                groupBalancesRepository.save(groupBalances);
+            }
+        }
+
+        return new ExpenseResponseDto(group.getName(), group.getGroupId(), userId,
+                expenseRequestDto.getDesc(), expenseRequestDto.getPhoneNumbers());
+    }
 }
+

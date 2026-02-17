@@ -18,7 +18,7 @@ public class ExpenseRequestDto {
         this.desc = desc;
         this.phoneNumbers = phoneNumbers;
     }
-    public ExpenseRequestDto(Long groupId, double totalAmount, List<ContactRequestDto> contacts,String  desc) {
+    public ExpenseRequestDto(Long groupId, double totalAmount,String  desc, List<ContactRequestDto> contacts) {
         this.groupId = groupId;
         this.totalAmount = totalAmount;
         this.desc = desc;

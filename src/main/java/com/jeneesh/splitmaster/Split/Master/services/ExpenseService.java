@@ -5,4 +5,5 @@ import com.jeneesh.splitmaster.Split.Master.dto.ExpenseResponseDto;
 
 public interface ExpenseService {
     ExpenseResponseDto createSplitManual(Long userId, ExpenseRequestDto expenseRequestDto);
+    ExpenseResponseDto createSplitAuto(Long userId, ExpenseRequestDto expenseRequestDto);
 }

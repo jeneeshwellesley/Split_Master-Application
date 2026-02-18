@@ -229,8 +229,42 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public ExpensePaidResponseDto paySplit(Long userId, ExpensePayRequestDto expensePayRequestDto) {
-        return null;
+    public ExpensePaidResponseDto paySplit(Long userId, ExpensePayRequestDto expensePayRequestDto){
+        if(userId == null){
+            throw new RuntimeException("Invalid user id");
+        }
+        User user = userRepository.findById(userId).orElse(null);
+        Groups groups = groupRepository.findById(expensePayRequestDto.getGroupId()).orElseThrow(() ->new RuntimeException("Group not found"));
+        Expense expense = expenseRepository.findById(expensePayRequestDto.getExpenseId()).orElseThrow(() ->new RuntimeException("Expense not found"));
+        ExpenseParticipants expenseParticipants = expenseParticipantsRepository.findByExpenseIdAndGroupIdAndUserId(expense,groups,user).orElseThrow(() -> new RuntimeException("Participant not found"));
+
+        if(expenseParticipants.getPaidAmount() == expenseParticipants.getOwnedAmount()){
+            throw new RuntimeException("You already paid your split amount earlier");
+        }
+
+        if(expensePayRequestDto.getAmount() < expenseParticipants.getOwnedAmount() || expensePayRequestDto.getAmount() > expenseParticipants.getOwnedAmount()){
+            throw new RuntimeException("Amount cannot be more than or less than the split amount");
+        }
+        User receiver = userRepository.findById(expense.getCreatedBy()).orElseThrow(() ->new RuntimeException("User not found"));
+
+
+        expenseParticipants.setPaidAmount(expensePayRequestDto.getAmount());
+        expenseParticipantsRepository.save(expenseParticipants);
+
+        GroupBalances groupBalances = groupBalancesRepository.findByGroupIdAndPayerIdAndReceiverId(groups,user,receiver).orElse(null);
+
+        if(groupBalances.getAmount() > expensePayRequestDto.getAmount()){
+            double finalAmount = groupBalances.getAmount() - expensePayRequestDto.getAmount();
+            groupBalances.setAmount(finalAmount);
+            groupBalancesRepository.save(groupBalances);
+        }
+        else{
+            groupBalancesRepository.delete(groupBalances);
+        }
+
+        return new ExpensePaidResponseDto(groups.getGroupId(),groups.getName(),expenseParticipants.getOwnedAmount(),
+                expenseParticipants.getPaidAmount());
+
     }
 
 

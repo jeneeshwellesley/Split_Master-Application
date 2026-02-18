@@ -1,5 +1,7 @@
 package com.jeneesh.splitmaster.Split.Master.restControllers;
 
+import com.jeneesh.splitmaster.Split.Master.dto.ExpensePaidResponseDto;
+import com.jeneesh.splitmaster.Split.Master.dto.ExpensePayRequestDto;
 import com.jeneesh.splitmaster.Split.Master.dto.ExpenseRequestDto;
 import com.jeneesh.splitmaster.Split.Master.dto.ExpenseResponseDto;
 import com.jeneesh.splitmaster.Split.Master.services.ExpenseService;
@@ -23,7 +25,12 @@ public class ExpenseController {
 
     @PostMapping("/{userId}/createSplitAuto")
     public ExpenseResponseDto createSplitAuto(@PathVariable Long userId, @RequestBody ExpenseRequestDto expenseRequestDto){
-        return null;
+        return expenseService.createSplitAuto(userId, expenseRequestDto);
+    }
+
+    @PostMapping("/{userId}/paySplit")
+    public ExpensePaidResponseDto paySplit(@PathVariable Long userId, @RequestBody ExpensePayRequestDto expensePayRequestDto){
+        return expenseService.paySplit(userId, expensePayRequestDto);
     }
 
 }

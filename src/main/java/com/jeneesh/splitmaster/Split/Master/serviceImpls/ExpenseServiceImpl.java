@@ -9,7 +9,9 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -234,7 +236,11 @@ public class ExpenseServiceImpl implements ExpenseService {
             throw new RuntimeException("Invalid user id");
         }
         User user = userRepository.findById(userId).orElse(null);
-        Groups groups = groupRepository.findById(expensePayRequestDto.getGroupId()).orElseThrow(() ->new RuntimeException("Group not found"));
+        Groups groups = groupRepository.findById(expensePayRequestDto.getGroupId())
+                .orElseThrow(() ->new RuntimeException("Group not found"));
+        if(!groupParticipantsRepository.existsByMembersIdAndGroupId(user,groups)){
+            throw new RuntimeException("The user does not have a group with the group id");
+        }
         Expense expense = expenseRepository.findById(expensePayRequestDto.getExpenseId()).orElseThrow(() ->new RuntimeException("Expense not found"));
         ExpenseParticipants expenseParticipants = expenseParticipantsRepository.findByExpenseIdAndGroupIdAndUserId(expense,groups,user).orElseThrow(() -> new RuntimeException("Participant not found"));
 
@@ -266,6 +272,35 @@ public class ExpenseServiceImpl implements ExpenseService {
                 expenseParticipants.getPaidAmount());
 
     }
+
+    @Override
+    public ExpenseOverallSplitsResDto viewAllSplits(Long userId, SplitsRequestDto splitsRequestDto) {
+        if(userId == null){
+            throw new RuntimeException("Invalid user id");
+        }
+        User user = userRepository.findById(userId).orElseThrow(()->
+                new RuntimeException("No user profile found for this id"));
+        Groups group = groupRepository.findById(splitsRequestDto.getGroupId()).orElseThrow(()->
+                new RuntimeException("No groups were found for this groupId"));
+        if(!groupParticipantsRepository.existsByMembersIdAndGroupId(user,group)){
+            throw new RuntimeException("The user does not have a group with the group id");
+        }
+        List<ExpenseParticipants>allSplits = expenseParticipantsRepository.findByGroupIdAndUserId(user,group).orElseThrow(()->
+                new RuntimeException("No splits were found for this user id or group id"));
+
+        List<ExpenseSplitView>splitList = new ArrayList<>();
+
+        for(ExpenseParticipants expenseParticipants : allSplits){
+            Expense tempExp = expenseRepository.findById(expenseParticipants.getExpenseId()).orElse(null);
+            ExpenseSplitView splitView = new ExpenseSplitView(expenseParticipants.getExpenseId(), tempExp.getDescription(),
+                    tempExp.getTotalAmount(), expenseParticipants.getPaidAmount());
+            splitList.add(splitView);
+        }
+
+        return new ExpenseOverallSplitsResDto(group.getGroupId(), group.getName(), splitList);
+    }
+
+
 
 
 }

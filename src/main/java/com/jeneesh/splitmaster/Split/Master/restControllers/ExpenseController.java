@@ -1,9 +1,6 @@
 package com.jeneesh.splitmaster.Split.Master.restControllers;
 
-import com.jeneesh.splitmaster.Split.Master.dto.ExpensePaidResponseDto;
-import com.jeneesh.splitmaster.Split.Master.dto.ExpensePayRequestDto;
-import com.jeneesh.splitmaster.Split.Master.dto.ExpenseRequestDto;
-import com.jeneesh.splitmaster.Split.Master.dto.ExpenseResponseDto;
+import com.jeneesh.splitmaster.Split.Master.dto.*;
 import com.jeneesh.splitmaster.Split.Master.services.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -31,6 +28,11 @@ public class ExpenseController {
     @PostMapping("/{userId}/paySplit")
     public ExpensePaidResponseDto paySplit(@PathVariable Long userId, @RequestBody ExpensePayRequestDto expensePayRequestDto){
         return expenseService.paySplit(userId, expensePayRequestDto);
+    }
+
+    @GetMapping("/{userId}/viewAllSplits")
+    public ExpenseOverallSplitsResDto viewAllSplits(@PathVariable Long userId,@RequestBody SplitsRequestDto splitsRequestDto){
+        return expenseService.viewAllSplits(userId, splitsRequestDto);
     }
 
 }

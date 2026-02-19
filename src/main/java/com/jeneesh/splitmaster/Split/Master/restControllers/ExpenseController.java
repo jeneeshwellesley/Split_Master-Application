@@ -35,4 +35,9 @@ public class ExpenseController {
         return expenseService.viewAllSplits(userId, splitsRequestDto);
     }
 
+    @GetMapping("/{userId}/viewOweAndOwedAmount")
+    public ExpensePaidResponseDto viewOweAndQwedAmount(@PathVariable Long userId, @RequestBody SplitsRequestDto splitsRequestDto){
+        return expenseService.viewOweAndOwedAmount(userId, splitsRequestDto);
+    }
+
 }

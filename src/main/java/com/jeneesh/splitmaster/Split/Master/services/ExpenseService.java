@@ -7,5 +7,6 @@ public interface ExpenseService {
     ExpenseResponseDto createSplitAuto(Long userId, ExpenseRequestDto expenseRequestDto);
     ExpensePaidResponseDto paySplit(Long userId, ExpensePayRequestDto expensePayRequestDto);
     ExpenseOverallSplitsResDto viewAllSplits(Long userId,SplitsRequestDto splitsRequestDto);
+    ExpensePaidResponseDto viewOweAndOwedAmount(Long userId, SplitsRequestDto splitsRequestDto);
 
 }

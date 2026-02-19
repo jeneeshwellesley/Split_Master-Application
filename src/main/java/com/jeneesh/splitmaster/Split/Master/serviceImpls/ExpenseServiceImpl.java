@@ -9,10 +9,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class ExpenseServiceImpl implements ExpenseService {
@@ -252,8 +249,6 @@ public class ExpenseServiceImpl implements ExpenseService {
             throw new RuntimeException("Amount cannot be more than or less than the split amount");
         }
         User receiver = userRepository.findById(expense.getCreatedBy()).orElseThrow(() ->new RuntimeException("User not found"));
-
-
         expenseParticipants.setPaidAmount(expensePayRequestDto.getAmount());
         expenseParticipantsRepository.save(expenseParticipants);
 
@@ -267,10 +262,8 @@ public class ExpenseServiceImpl implements ExpenseService {
         else{
             groupBalancesRepository.delete(groupBalances);
         }
-
         return new ExpensePaidResponseDto(groups.getGroupId(),groups.getName(),expenseParticipants.getOwnedAmount(),
                 expenseParticipants.getPaidAmount());
-
     }
 
     @Override
@@ -287,7 +280,6 @@ public class ExpenseServiceImpl implements ExpenseService {
         }
         List<ExpenseParticipants>allSplits = expenseParticipantsRepository.findByGroupIdAndUserId(user,group).orElseThrow(()->
                 new RuntimeException("No splits were found for this user id or group id"));
-
         List<ExpenseSplitView>splitList = new ArrayList<>();
 
         for(ExpenseParticipants expenseParticipants : allSplits){
@@ -296,8 +288,34 @@ public class ExpenseServiceImpl implements ExpenseService {
                     tempExp.getTotalAmount(), expenseParticipants.getPaidAmount());
             splitList.add(splitView);
         }
-
         return new ExpenseOverallSplitsResDto(group.getGroupId(), group.getName(), splitList);
+    }
+
+    @Override
+    public ExpensePaidResponseDto viewOweAndOwedAmount(Long userId, SplitsRequestDto splitsRequestDto) {
+        double owedAmount = 0;
+        double oweAmount = 0;
+        if (userId == null) {
+            throw new RuntimeException("Invalid user id");
+        }
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("No user profile found for this id"));
+        Groups groups = groupRepository.findById(splitsRequestDto.getGroupId()).
+                orElseThrow(() -> new RuntimeException("No group was found for the entered id"));
+        if (!groupParticipantsRepository.existsByMembersIdAndGroupId(user, groups)) {
+            throw new RuntimeException("The user does not have a group with the group id");
+        }
+            List<Optional<GroupBalances>>hasToPay = groupBalancesRepository.findByGroupIdAndPayerId(groups, user);
+            for(Optional<GroupBalances> obj : hasToPay){
+                owedAmount += obj.get().getAmount();
+
+        }
+            List<Optional<GroupBalances>> hasToGet = groupBalancesRepository.findByGroupIdAndReceiverId(groups, user);
+            for(Optional<GroupBalances> obj : hasToGet){
+                oweAmount += obj.get().getAmount();
+            }
+
+
+        return new ExpensePaidResponseDto(groups.getGroupId(),groups.getName(),owedAmount,oweAmount);
     }
 
 

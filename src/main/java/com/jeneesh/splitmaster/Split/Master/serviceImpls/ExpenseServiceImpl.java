@@ -65,6 +65,15 @@ public class ExpenseServiceImpl implements ExpenseService {
         if (expenseRequestDto.getTotalAmount() < members) {
             throw new RuntimeException("Minimum 1 Rupee per person is allowed");
         }
+        if (totalAmountPaid > expenseRequestDto.getTotalAmount()) {
+            throw new RuntimeException("Amount paid by users exceed total amount");
+        }
+        if (expenseRequestDto.getPaidByCreator() > expenseRequestDto.getTotalAmount() - (members - 1)) {
+            throw new RuntimeException("Leave minimum 1 rupee per person");
+        }
+        if (totalAmountPaid + expenseRequestDto.getPaidByCreator() > expenseRequestDto.getTotalAmount()) {
+            throw new RuntimeException("The amount paid by you and the participants exceed te total amount");
+        }
         for (ExpenseParticipantsDto num : expenseRequestDto.getPhoneNumbers()) {
             User tempUser = userRepository.findByPhoneNumber(num.getPhoneNumber());
             UserValidation.validPhoneNumber(num.getPhoneNumber());
@@ -88,15 +97,8 @@ public class ExpenseServiceImpl implements ExpenseService {
                 numSet.add(num.getPhoneNumber());
             }
         }
-        if (totalAmountPaid > expenseRequestDto.getTotalAmount()) {
-            throw new RuntimeException("Amount paid by users exceed total amount");
-        }
-        if (expenseRequestDto.getPaidByCreator() > expenseRequestDto.getTotalAmount() - (members - 1)) {
-            throw new RuntimeException("Leave minimum 1 rupee per person");
-        }
-        if (totalAmountPaid + expenseRequestDto.getPaidByCreator() > expenseRequestDto.getTotalAmount()) {
-            throw new RuntimeException("The amount paid by you and the participants exceed te total amount");
-        }
+
+
 
         Expense expense = new Expense(group, user, expenseRequestDto.getDesc(), expenseRequestDto.getTotalAmount());
         expenseRepository.save(expense);
@@ -146,10 +148,13 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional
-    public ExpenseResponseDto createSplitAuto(Long userId, ExpenseRequestDto expenseRequestDto) {
+    public ExpenseAutoSplitResponse createSplitAuto(Long userId, ExpenseRequestDto expenseRequestDto) {
         Set<String> numSet = new HashSet<>();
         int members = expenseRequestDto.getContacts().size() + 1;
-        double hasToPay = expenseRequestDto.getTotalAmount() - expenseRequestDto.getPaidByCreator() / (members - 1);
+        double hasToPay =
+                (expenseRequestDto.getTotalAmount()
+                        - expenseRequestDto.getPaidByCreator())
+                        / (members - 1);
         if (userId == null) {
             throw new RuntimeException("Invalid user id");
         }
@@ -167,7 +172,7 @@ public class ExpenseServiceImpl implements ExpenseService {
             if (!userRepository.existsByPhoneNumber(num.getPhoneNumber())) {
                 throw new RuntimeException("Phone number not found");
             }
-            if (groupParticipantsRepository.existsByMembersIdAndGroupId(tempUser, group)) {
+            if (!groupParticipantsRepository.existsByMembersIdAndGroupId(tempUser, group)) {
                 throw new RuntimeException("One of the numbers you entered is not in your group");
             }
 
@@ -197,7 +202,7 @@ public class ExpenseServiceImpl implements ExpenseService {
                         .orElse(null);
 
                 double creatorAmount = creatorGroupBalance.getAmount();
-                double participantAmount = expenseParticipants.getOwnedAmount();
+                double participantAmount = expenseParticipant2.getOwnedAmount();
 
                 if (creatorAmount > participantAmount) {
                     creatorAmount = creatorAmount - participantAmount;
@@ -222,9 +227,7 @@ public class ExpenseServiceImpl implements ExpenseService {
                 groupBalancesRepository.save(groupBalances);
             }
         }
-
-        return new ExpenseResponseDto(group.getName(), group.getGroupId(), userId,
-                expenseRequestDto.getDesc(), expenseRequestDto.getPhoneNumbers());
+        return new ExpenseAutoSplitResponse(group.getName(), group.getGroupId(), userId,expenseRequestDto.getDesc(),expenseRequestDto.getContacts());
     }
 
     @Override

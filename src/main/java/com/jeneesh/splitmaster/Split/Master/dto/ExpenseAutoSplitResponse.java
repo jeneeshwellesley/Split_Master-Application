@@ -2,14 +2,14 @@ package com.jeneesh.splitmaster.Split.Master.dto;
 
 import java.util.List;
 
-public class ExpenseResponseDto {
-    private String groupName;
-    private Long groupId;
-    private Long createdBy;
-    private String desc;
-    private List<ExpenseParticipantsDto>numbers;
+public class ExpenseAutoSplitResponse {
+        private String groupName;
+        private Long groupId;
+        private Long createdBy;
+        private String desc;
+        private List<ContactRequestDto>numbers;
 
-    public ExpenseResponseDto(String groupName, Long groupId, Long createdBy, String desc, List<ExpenseParticipantsDto> numbers) {
+    public ExpenseAutoSplitResponse(String groupName, Long groupId, Long createdBy, String desc, List<ContactRequestDto> numbers) {
         this.groupName = groupName;
         this.groupId = groupId;
         this.createdBy = createdBy;
@@ -17,13 +17,12 @@ public class ExpenseResponseDto {
         this.numbers = numbers;
     }
 
-    public ExpenseResponseDto() {
-
+    public ExpenseAutoSplitResponse() {
     }
 
     @Override
     public String toString() {
-        return "ExpenseResponseDto{" +
+        return "ExpenseAutoSplitResponse{" +
                 "groupName='" + groupName + '\'' +
                 ", groupId=" + groupId +
                 ", createdBy=" + createdBy +
@@ -31,8 +30,6 @@ public class ExpenseResponseDto {
                 ", numbers=" + numbers +
                 '}';
     }
-
-
 
     public String getGroupName() {
         return groupName;
@@ -50,12 +47,12 @@ public class ExpenseResponseDto {
         this.groupId = groupId;
     }
 
-    public String getDesc() {
-        return desc;
+    public List<ContactRequestDto> getNumbers() {
+        return numbers;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public void setNumbers(List<ContactRequestDto> numbers) {
+        this.numbers = numbers;
     }
 
     public Long getCreatedBy() {
@@ -66,11 +63,11 @@ public class ExpenseResponseDto {
         this.createdBy = createdBy;
     }
 
-    public List<ExpenseParticipantsDto> getNumbers() {
-        return numbers;
+    public String getDesc() {
+        return desc;
     }
 
-    public void setNumbers(List<ExpenseParticipantsDto> numbers) {
-        this.numbers = numbers;
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 }

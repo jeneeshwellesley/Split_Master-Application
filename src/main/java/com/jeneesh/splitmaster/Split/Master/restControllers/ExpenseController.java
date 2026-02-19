@@ -21,7 +21,7 @@ public class ExpenseController {
     }
 
     @PostMapping("/{userId}/createSplitAuto")
-    public ExpenseResponseDto createSplitAuto(@PathVariable Long userId, @RequestBody ExpenseRequestDto expenseRequestDto){
+    public ExpenseAutoSplitResponse createSplitAuto(@PathVariable Long userId, @RequestBody ExpenseRequestDto expenseRequestDto){
         return expenseService.createSplitAuto(userId, expenseRequestDto);
     }
 

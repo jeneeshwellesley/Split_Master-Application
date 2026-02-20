@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface ExpenseParticipantsRepository extends JpaRepository<ExpenseParticipants,Long> {
     Optional<ExpenseParticipants> findByExpenseIdAndGroupIdAndUserId(Expense expenseId, Groups groupId, User userId);
-    Optional<List<ExpenseParticipants>> findByGroupIdAndUserId(User userId,Groups groupId);
+    Optional<List<ExpenseParticipants>> findByGroupIdAndUserId(Groups groupId,User user);
 
 
 

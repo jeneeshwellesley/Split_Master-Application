@@ -10,8 +10,4 @@ public class SplitMasterApplication {
 		SpringApplication.run(SplitMasterApplication.class, args);
 	}
 
-
-
-
-
 }

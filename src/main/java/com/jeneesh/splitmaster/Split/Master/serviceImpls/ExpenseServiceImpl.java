@@ -40,7 +40,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Transactional
     @Override
-    public ExpenseResponseDto createSplitManual(Long userId, ExpenseRequestDto expenseRequestDto) {
+    public ExpenseResponseDto createSplitManual(Long userId, ExpenseRequestDto expenseRequestDto){
         int members = expenseRequestDto.getPhoneNumbers().size() + 1;
         double totalAmountPaid = 0;
         double hasToPay =
@@ -97,9 +97,6 @@ public class ExpenseServiceImpl implements ExpenseService {
                 numSet.add(num.getPhoneNumber());
             }
         }
-
-
-
         Expense expense = new Expense(group, user, expenseRequestDto.getDesc(), expenseRequestDto.getTotalAmount());
         expenseRepository.save(expense);
         ExpenseParticipants creatorExpense = new ExpenseParticipants(expense, group, user,
@@ -148,7 +145,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional
-    public ExpenseAutoSplitResponse createSplitAuto(Long userId, ExpenseRequestDto expenseRequestDto) {
+    public ExpenseAutoSplitResponse createSplitAuto(Long userId, ExpenseRequestDto expenseRequestDto){
         Set<String> numSet = new HashSet<>();
         int members = expenseRequestDto.getContacts().size() + 1;
         double hasToPay =
@@ -231,6 +228,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
+    @Transactional
     public ExpensePaidResponseDto paySplit(Long userId, ExpensePayRequestDto expensePayRequestDto){
         if(userId == null){
             throw new RuntimeException("Invalid user id");
@@ -281,8 +279,10 @@ public class ExpenseServiceImpl implements ExpenseService {
         if(!groupParticipantsRepository.existsByMembersIdAndGroupId(user,group)){
             throw new RuntimeException("The user does not have a group with the group id");
         }
-        List<ExpenseParticipants>allSplits = expenseParticipantsRepository.findByGroupIdAndUserId(user,group).orElseThrow(()->
+
+        List<ExpenseParticipants>allSplits = expenseParticipantsRepository.findByGroupIdAndUserId(group,user).orElseThrow(()->
                 new RuntimeException("No splits were found for this user id or group id"));
+
         List<ExpenseSplitView>splitList = new ArrayList<>();
 
         for(ExpenseParticipants expenseParticipants : allSplits){
@@ -310,7 +310,6 @@ public class ExpenseServiceImpl implements ExpenseService {
             List<Optional<GroupBalances>>hasToPay = groupBalancesRepository.findByGroupIdAndPayerId(groups, user);
             for(Optional<GroupBalances> obj : hasToPay){
                 owedAmount += obj.get().getAmount();
-
         }
             List<Optional<GroupBalances>> hasToGet = groupBalancesRepository.findByGroupIdAndReceiverId(groups, user);
             for(Optional<GroupBalances> obj : hasToGet){

@@ -3,11 +3,11 @@ package com.jeneesh.splitmaster.Split.Master.dto;
 import java.util.List;
 
 public class ExpenseAutoSplitResponse {
-        private String groupName;
-        private Long groupId;
-        private Long createdBy;
-        private String desc;
-        private List<ContactRequestDto>numbers;
+    private String groupName;
+    private Long groupId;
+    private Long createdBy;
+    private String desc;
+    private List<ContactRequestDto> numbers;
 
     public ExpenseAutoSplitResponse(String groupName, Long groupId, Long createdBy, String desc, List<ContactRequestDto> numbers) {
         this.groupName = groupName;
@@ -47,12 +47,12 @@ public class ExpenseAutoSplitResponse {
         this.groupId = groupId;
     }
 
-    public List<ContactRequestDto> getNumbers() {
-        return numbers;
+    public String getDesc() {
+        return desc;
     }
 
-    public void setNumbers(List<ContactRequestDto> numbers) {
-        this.numbers = numbers;
+    public void setDesc(String desc) {
+        this.desc = desc;
     }
 
     public Long getCreatedBy() {
@@ -63,11 +63,11 @@ public class ExpenseAutoSplitResponse {
         this.createdBy = createdBy;
     }
 
-    public String getDesc() {
-        return desc;
+    public List<ContactRequestDto> getNumbers() {
+        return numbers;
     }
 
-    public void setDesc(String desc) {
-        this.desc = desc;
+    public void setNumbers(List<ContactRequestDto> numbers) {
+        this.numbers = numbers;
     }
 }

@@ -43,11 +43,11 @@ public class ExpenseServiceImpl implements ExpenseService {
     public ExpenseResponseDto createSplitManual(Long userId, ExpenseRequestDto expenseRequestDto){
         int members = expenseRequestDto.getPhoneNumbers().size() + 1;
         double totalAmountPaid = 0;
+        // This is the amount that each participate has to pay after what the creator paid
         double hasToPay =
                 (expenseRequestDto.getTotalAmount() -
                         expenseRequestDto.getPaidByCreator())
                         / (members - 1);
-        System.out.println("The split amount is -> " + hasToPay);
         Set<String> numSet = new HashSet<>();
         if (userId == null) {
             throw new RuntimeException("Invalid user id");
@@ -62,21 +62,14 @@ public class ExpenseServiceImpl implements ExpenseService {
         if (!groupParticipantsRepository.existsByMembersIdAndGroupId(user, group)) {
             throw new RuntimeException("You don't have a group with that group id ");
         }
-        if (expenseRequestDto.getTotalAmount() < members) {
-            throw new RuntimeException("Minimum 1 Rupee per person is allowed");
-        }
-        if (totalAmountPaid > expenseRequestDto.getTotalAmount()) {
-            throw new RuntimeException("Amount paid by users exceed total amount");
-        }
-        if (expenseRequestDto.getPaidByCreator() > expenseRequestDto.getTotalAmount() - (members - 1)) {
-            throw new RuntimeException("Leave minimum 1 rupee per person");
-        }
-        if (totalAmountPaid + expenseRequestDto.getPaidByCreator() > expenseRequestDto.getTotalAmount()) {
-            throw new RuntimeException("The amount paid by you and the participants exceed te total amount");
-        }
+        // Use this for loop to find the total amount paid by the participants and
+        // for each number validation must be carried out like group and user relationship
+        // check if there's duplicate numbers in the participants list
+        // if each number is unique then add them into the set
+
         for (ExpenseParticipantsDto num : expenseRequestDto.getPhoneNumbers()) {
-            User tempUser = userRepository.findByPhoneNumber(num.getPhoneNumber());
             UserValidation.validPhoneNumber(num.getPhoneNumber());
+            User tempUser = userRepository.findByPhoneNumber(num.getPhoneNumber());
             totalAmountPaid += num.getAmount();
             if (num.getPhoneNumber().equalsIgnoreCase(user.getPhoneNumber())) {
                 throw new RuntimeException("User phone number cannot be in tne participants");
@@ -96,18 +89,39 @@ public class ExpenseServiceImpl implements ExpenseService {
             else {
                 numSet.add(num.getPhoneNumber());
             }
+            // After the first for loop we use the total amount to do the
+            // validation and constraints we have...
         }
+        if (expenseRequestDto.getTotalAmount() < members) {
+            throw new RuntimeException("Minimum 1 Rupee per person is allowed");
+        }
+        if (totalAmountPaid > expenseRequestDto.getTotalAmount()) {
+            throw new RuntimeException("Amount paid by users exceed total amount");
+        }
+        if (expenseRequestDto.getPaidByCreator() > expenseRequestDto.getTotalAmount() - (members - 1)) {
+            throw new RuntimeException("Leave minimum 1 rupee per person");
+        }
+        if (totalAmountPaid + expenseRequestDto.getPaidByCreator() > expenseRequestDto.getTotalAmount()) {
+            throw new RuntimeException("The amount paid by you and the participants exceed te total amount");
+        }
+        // Create the expense object to use it to fetch expense Id
+
         Expense expense = new Expense(group, user, expenseRequestDto.getDesc(), expenseRequestDto.getTotalAmount());
         expenseRepository.save(expense);
+        // Creator's expense participant object
+
         ExpenseParticipants creatorExpense = new ExpenseParticipants(expense, group, user,
                 expenseRequestDto.getPaidByCreator(), expenseRequestDto.getPaidByCreator());
         expenseParticipantsRepository.save(creatorExpense);
 
+        // For each number in the set we have to save them as a expense participant
 
         for (ExpenseParticipantsDto num : expenseRequestDto.getPhoneNumbers()) {
             User tempUser = userRepository.findByPhoneNumber(num.getPhoneNumber());
             ExpenseParticipants expenseParticipants = new ExpenseParticipants(expense, group, tempUser, num.getAmount(), 0);
             expenseParticipantsRepository.save(expenseParticipants);
+            // We do the group balances validation and updates here
+
             if (groupBalancesRepository.existsByGroupIdAndPayerIdAndReceiverId(group, user, tempUser)) {
                 GroupBalances creatorGroupBalance = groupBalancesRepository.findByGroupIdAndPayerIdAndReceiverId(group, user, tempUser).orElseThrow(() ->
                         new RuntimeException("Group balances not found"));
@@ -280,8 +294,8 @@ public class ExpenseServiceImpl implements ExpenseService {
             throw new RuntimeException("The user does not have a group with the group id");
         }
 
-        List<ExpenseParticipants>allSplits = expenseParticipantsRepository.findByGroupIdAndUserId(group,user).orElseThrow(()->
-                new RuntimeException("No splits were found for this user id or group id"));
+        List<ExpenseParticipants>allSplits = expenseParticipantsRepository.findByGroupIdAndUserId(group,user)
+                .orElseThrow(()-> new RuntimeException("No splits were found for this user id or group id"));
 
         List<ExpenseSplitView>splitList = new ArrayList<>();
 

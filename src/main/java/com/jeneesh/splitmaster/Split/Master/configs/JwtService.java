@@ -6,10 +6,12 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.util.Date;
 
+@Service
 public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
@@ -27,8 +29,7 @@ public class JwtService {
     }
 
     public Key getSigningKey(){
-        byte[]keyBytes = Decoders.BASE64.decode(secret);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public Long extractUserId(String token) {

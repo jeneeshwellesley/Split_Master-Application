@@ -1,8 +1,5 @@
 package com.jeneesh.splitmaster.Split.Master.validations;
 
-import com.jeneesh.splitmaster.Split.Master.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-
 public class UserValidation{
 
     public static boolean validPhoneNumber(String ph) {

@@ -72,38 +72,27 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public UserResponseDto updateProfile(UserUpdateDto userUpdateDto, Long userId){
-            boolean userNameIsPre = false;
-            boolean phoneNumberIsPre = false;
+
         if(userId == null){
             throw new RuntimeException("Invalid UserId");
         }
-
         if(userRepository.existsByPhoneNumber(userUpdateDto.getPhoneNumber())){
             throw new RuntimeException("Requested Phone Number already exists");
         }
 
+        User user = userRepository.findById(userId).orElseThrow(() ->
+                new  RuntimeException("User does not exist"));
 
-        if(userUpdateDto.getUserName() != null) {
-            UserValidation.validUserName(userUpdateDto.getUserName());
-            userNameIsPre = true;
-        }
-        if(userUpdateDto.getPhoneNumber() != null) {
-            UserValidation.validPhoneNumber(userUpdateDto.getPhoneNumber());
-            phoneNumberIsPre = true;
-        }
-
-        User user = userRepository.findById(userId).orElseThrow(() -> new  RuntimeException("User does not exist"));
-
-        if(userNameIsPre){
+        if(UserValidation.validUserName(userUpdateDto.getUserName())){
             user.setUserName(userUpdateDto.getUserName());
         }
-        if(phoneNumberIsPre){
+
+        if(UserValidation.validPhoneNumber(userUpdateDto.getPhoneNumber())){
             user.setPhoneNumber(userUpdateDto.getPhoneNumber());
         }
+
         userRepository.save(user);
-
         return new UserResponseDto(user.getUserId(),user.getUserName(), user.getPhoneNumber(), user.getCreatedAt(), LocalDateTime.now());
-
     }
 
     @Override

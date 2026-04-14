@@ -1,10 +1,12 @@
 package com.jeneesh.splitmaster.Split.Master.serviceImpls;
 
+import com.jeneesh.splitmaster.Split.Master.configs.JwtService;
 import com.jeneesh.splitmaster.Split.Master.dto.*;
 import com.jeneesh.splitmaster.Split.Master.entities.User;
 import com.jeneesh.splitmaster.Split.Master.repositories.UserRepository;
 import com.jeneesh.splitmaster.Split.Master.services.UserService;
 import com.jeneesh.splitmaster.Split.Master.validations.UserValidation;
+import io.jsonwebtoken.Jwt;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,10 +17,12 @@ import java.time.LocalDateTime;
 @Service
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
+    private JwtService jwtService;
 
         @Autowired
-        public UserServiceImpl(UserRepository userRepository){
+        public UserServiceImpl(UserRepository userRepository, JwtService jwtService) {
             this.userRepository = userRepository;
+            this.jwtService = jwtService;
         }
     @Transactional
     @Override
@@ -54,6 +58,9 @@ public class UserServiceImpl implements UserService {
         if(!newUser.getPassword().equals(user.getPassword())){
             throw new  RuntimeException("Passwords do not match");
         }
+
+        String token = jwtService.generateToken(123L);
+        System.out.println(token);
 
         return new UserResponseDto(newUser.getUserId(), newUser.getUserName(),
                 newUser.getPhoneNumber(), newUser.getCreatedAt(),newUser.getUpdatedAt());
